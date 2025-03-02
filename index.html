@@ -3,89 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Tracker - Redstorm Modeling Agency - Version 2</title>
+    <title>Attendance Tracker - Redstorm Modeling Agency</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .input-section, .button-section, .summary-section {
-            margin: 20px 0;
-        }
-        label {
-            margin-right: 10px;
-            font-weight: bold;
-        }
-        #weekPeriod, #newMemberName {
-            width: 200px;
-            padding: 5px;
-        }
-        select {
-            padding: 5px;
-        }
-        button {
-            padding: 8px 15px;
-            margin: 5px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            overflow-x: auto;
-            display: block;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        td select {
-            width: 50px;
-            padding: 2px;
-        }
-        button.remove-btn {
-            background-color: #f44336;
-        }
-        button.remove-btn:hover {
-            background-color: #da190b;
-        }
-        .legend, .summary {
-            margin-top: 20px;
-            display: inline-block;
-            vertical-align: top;
-        }
-        .legend h3, .summary h3 {
-            margin-bottom: 10px;
-        }
-        .legend p, .summary p {
-            margin: 5px 0;
-        }
-        .farewell-row {
-            color: gray;
-        }
-        .summary {
-            margin-left: 20px;
-        }
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #333; }
+        .input-section, .button-section { margin: 20px 0; }
+        label { margin-right: 10px; font-weight: bold; }
+        #weekPeriod, #newMemberName { width: 200px; padding: 5px; }
+        select { padding: 5px; }
+        button { padding: 8px 15px; margin: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #45a049; }
+        table { border-collapse: collapse; width: 100%; overflow-x: auto; display: block; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        td select { width: 50px; padding: 2px; }
+        button.remove-btn { background-color: #f44336; }
+        button.remove-btn:hover { background-color: #da190b; }
     </style>
 </head>
 <body>
-    <h1>Attendance Tracker - Redstorm Modeling Agency - Version 2</h1>
+    <h1>Attendance Tracker - Redstorm Modeling Agency</h1>
     <div class="input-section">
         <label for="weekPeriod">Week Period:</label>
         <input type="text" id="weekPeriod" placeholder="e.g., Dec 5 - Dec 12">
@@ -117,99 +54,64 @@
         </thead>
         <tbody id="membersBody"></tbody>
     </table>
-    <div class="legend">
-        <h3>Legend:</h3>
-        <p>✅ = Present</p>
-        <p>☑️ = Valid Excuse</p>
-        <p>❌ = Absent</p>
-        <p>❔ = No Data (Upcoming)</p>
-    </div>
-    <div class="summary">
-        <h3>Summary</h3>
-        <p>Total Members: <span id="totalMembers">0</span></p>
-        <p>Total Officers: <span id="totalOfficers">0</span></p>
-        <p>Total Models: <span id="totalModels">0</span></p>
-    </div>
     <div class="button-section">
         <button onclick="downloadData()">Download Data</button>
         <input type="file" id="uploadFile" style="display: none;" onchange="uploadData(event)">
         <button onclick="document.getElementById('uploadFile').click()">Upload Data</button>
-        <button onclick="saveLatestData()">Save Latest Data</button>
-        <button onclick="loadLatestData()">Load Latest Data</button>
-        <button onclick="outputAsPNG()">Output as PNG</button>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
     <script>
-        // Paste your Firebase configuration here (replace this entire block)
-       const firebaseConfig = {
-  apiKey: "AIzaSyCzRVPcSi_XqoBB1pxl_MQ_tRGIgFeZXAM",
-  authDomain: "attendancetracker-f1e92.firebaseapp.com",
-  projectId: "attendancetracker-f1e92",
-  storageBucket: "attendancetracker-f1e92.firebasestorage.app",
-  messagingSenderId: "1074297148500",
-  appId: "1:1074297148500:web:6dde4243517c13e848c9c1"
-};
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
         let weekPeriod = "";
         let members = [];
-
         const weekInput = document.getElementById("weekPeriod");
+
         weekInput.onchange = function() {
             weekPeriod = this.value.trim();
         };
 
         function updateTable() {
             const tbody = document.getElementById("membersBody");
-            tbody.innerHTML = members.length === 0 ? "<tr><td colspan='10'>No members added yet.</td></tr>" : "";
-            members.forEach((member, index) => {
-                const row = document.createElement("tr");
-                if (member.farewell) {
-                    row.classList.add("farewell-row");
-                }
-                row.innerHTML = `
-                    <td>${member.name}</td>
-                    <td>${member.tag}</td>
-                    ${member.attendance.map((status, day) => `
-                        <td>
-                            <select onchange="updateAttendance(${index}, ${day}, this.value)" ${member.farewell ? 'disabled' : ''}>
-                                <option value="❔" ${status === "❔" ? "selected" : ""}>❔</option>
-                                <option value="✅" ${status === "✅" ? "selected" : ""}>✅</option>
-                                <option value="☑️" ${status === "☑️" ? "selected" : ""}>☑️</option>
-                                <option value="❌" ${status === "❌" ? "selected" : ""}>❌</option>
-                            </select>
-                        </td>
-                    `).join("")}
-                    <td>
-                        <button class="remove-btn" onclick="removeMember(${index})">Remove</button>
-                        <button onclick="toggleFarewell(${index})">${member.farewell ? "Undo Farewell" : "Farewell"}</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            updateSummary();
+            tbody.innerHTML = "";
+            if (members.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='10'>No members added yet.</td></tr>";
+            } else {
+                members.forEach((member, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${member.name}</td>
+                        <td>${member.tag}</td>
+                        ${member.attendance.map((status, day) => `
+                            <td>
+                                <select onchange="updateAttendance(${index}, ${day}, this.value)">
+                                    <option value="❔" ${status === "❔" ? "selected" : ""}>❔</option>
+                                    <option value="✅" ${status === "✅" ? "selected" : ""}>✅</option>
+                                    <option value="☑️" ${status === "☑️" ? "selected" : ""}>☑️</option>
+                                    <option value="❌" ${status === "❌" ? "selected" : ""}>❌</option>
+                                </select>
+                            </td>
+                        `).join("")}
+                        <td><button class="remove-btn" onclick="removeMember(${index})">Remove</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
         }
 
         function addMember() {
             const name = document.getElementById("newMemberName").value.trim();
             const tag = document.getElementById("newMemberTag").value;
-            if (name) {
-                members.push({
-                    name: name,
-                    tag: tag,
-                    attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
-                    farewell: false
-                });
-                updateTable();
-                document.getElementById("newMemberName").value = "";
-            } else {
+            if (!name) {
                 alert("Please enter a member name.");
+                return;
             }
+            members.push({
+                name: name,
+                tag: tag,
+                attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                farewell: false
+            });
+            document.getElementById("newMemberName").value = "";
+            updateTable();
         }
 
         function removeMember(index) {
@@ -217,23 +119,8 @@
             updateTable();
         }
 
-        function toggleFarewell(index) {
-            members[index].farewell = !members[index].farewell;
-            updateTable();
-        }
-
         function updateAttendance(memberIndex, dayIndex, value) {
             members[memberIndex].attendance[dayIndex] = value;
-        }
-
-        function updateSummary() {
-            const activeMembers = members.filter(m => !m.farewell);
-            const totalMembers = activeMembers.length;
-            const totalOfficers = activeMembers.filter(m => m.tag === "Officer").length;
-            const totalModels = activeMembers.filter(m => m.tag === "Model").length;
-            document.getElementById("totalMembers").textContent = totalMembers;
-            document.getElementById("totalOfficers").textContent = totalOfficers;
-            document.getElementById("totalModels").textContent = totalModels;
         }
 
         function downloadData() {
@@ -241,166 +128,42 @@
                 alert("Please enter a week period before downloading.");
                 return;
             }
-            const data = JSON.stringify({ week: weekPeriod, members: members });
-            const blob = new Blob([data], { type: "text/plain" });
+            const data = { week: weekPeriod, members: members };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `Attendance_${weekPeriod}.txt`;
+            a.download = `Attendance_${weekPeriod}.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
 
         function uploadData(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        weekPeriod = data.week || "";
-                        members = data.members || [];
-                        weekInput.value = weekPeriod;
-                        updateTable();
-                    } catch (err) {
-                        alert("Invalid file format.");
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.week || !Array.isArray(data.members)) {
+                        throw new Error("Missing week or members array.");
                     }
-                };
-                reader.readAsText(file);
-            }
-        }
-
-        function saveLatestData() {
-            if (!weekPeriod) {
-                alert("Please enter a week period before saving.");
-                return;
-            }
-            const data = { week: weekPeriod, members: members };
-            db.collection("attendance").doc("latest").set(data)
-                .then(() => alert("Data saved successfully!"))
-                .catch(error => alert("Error saving data: " + error));
-        }
-
-        function loadLatestData() {
-            db.collection("attendance").doc("latest").get()
-                .then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        weekPeriod = data.week || "";
-                        members = data.members || [];
-                        weekInput.value = weekPeriod;
-                        updateTable();
-                        alert("Data loaded successfully!");
-                    } else {
-                        alert("No data found.");
-                    }
-                })
-                .catch(error => alert("Error loading data: " + error));
-        }
-
-        function outputAsPNG() {
-            if (!weekPeriod) {
-                alert("Please enter a week period before outputting.");
-                return;
-            }
-            if (members.length === 0) {
-                alert("No members to output.");
-                return;
-            }
-            const scale = 3;
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            ctx.font = "16px Arial";
-
-            const memberNames = ["Member", ...members.map(m => m.name)];
-            const maxMemberWidth = Math.max(...memberNames.map(name => ctx.measureText(name).width));
-            const nameWidth = Math.max(150, maxMemberWidth + 40);
-            const tagWidth = 100;
-            const cellWidth = 60;
-            const rowHeight = 50;
-            const headerHeight = 60;
-            const tableHeight = headerHeight + (members.length + 1) * rowHeight;
-            const legendItems = ["✅ = Present", "☑️ = Valid Excuse", "❌ = Absent", "❔ = No Data (Upcoming)"];
-            const legendLineHeight = 25;
-            const legendHeight = 20 + (legendItems.length * legendLineHeight);
-            const totalHeight = tableHeight + legendHeight;
-            const totalWidth = nameWidth + tagWidth + 7 * cellWidth;
-
-            canvas.width = totalWidth * scale;
-            canvas.height = totalHeight * scale;
-            ctx.scale(scale, scale);
-
-            ctx.fillStyle = "#333";
-            ctx.fillRect(0, 0, totalWidth, totalHeight);
-
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(weekPeriod, totalWidth / 2, 20);
-
-            const headers = ["Member", "Tag", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-            let x = 0;
-            const columnWidths = [nameWidth, tagWidth, ...Array(7).fill(cellWidth)];
-            headers.forEach((header, i) => {
-                ctx.fillText(header, x + columnWidths[i] / 2, headerHeight / 2);
-                x += columnWidths[i];
-            });
-
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= members.length + 1; i++) {
-                ctx.beginPath();
-                ctx.moveTo(0, headerHeight + i * rowHeight);
-                ctx.lineTo(totalWidth, headerHeight + i * rowHeight);
-                ctx.stroke();
-            }
-            x = 0;
-            columnWidths.forEach(width => {
-                ctx.beginPath();
-                ctx.moveTo(x, headerHeight);
-                ctx.lineTo(x, tableHeight);
-                ctx.stroke();
-                x += width;
-            });
-
-            members.forEach((member, index) => {
-                const y = headerHeight + (index + 1) * rowHeight;
-                let colX = 0;
-
-                if (member.farewell) {
-                    ctx.fillStyle = "gray";
-                    ctx.fillText(member.name, colX + nameWidth / 2, y + rowHeight / 4);
-                    ctx.fillStyle = "red";
-                    ctx.fillText("(Farewell)", colX + nameWidth / 2, y + rowHeight / 2 + 10);
-                } else {
-                    ctx.fillStyle = "white";
-                    ctx.fillText(member.name, colX + nameWidth / 2, y + rowHeight / 2);
+                    weekPeriod = data.week;
+                    members = data.members.map(member => ({
+                        name: member.name || "",
+                        tag: member.tag || "Model",
+                        attendance: Array.isArray(member.attendance) && member.attendance.length === 7 ? member.attendance : ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                        farewell: !!member.farewell
+                    }));
+                    weekInput.value = weekPeriod;
+                    updateTable();
+                    alert("Data uploaded successfully!");
+                } catch (err) {
+                    alert("Invalid file format. Please upload a valid JSON file from 'Download Data'.");
+                    console.error(err);
                 }
-                colX += nameWidth;
-
-                ctx.fillStyle = member.farewell ? "gray" : "white";
-                ctx.fillText(member.tag, colX + tagWidth / 2, y + rowHeight / 2);
-                colX += tagWidth;
-
-                member.attendance.forEach(status => {
-                    ctx.fillText(status, colX + cellWidth / 2, y + rowHeight / 2);
-                    colX += cellWidth;
-                });
-            });
-
-            ctx.textAlign = "left";
-            ctx.fillStyle = "white";
-            let legendY = tableHeight + 20;
-            legendItems.forEach(item => {
-                ctx.fillText(item, 10, legendY);
-                legendY += legendLineHeight;
-            });
-
-            const dataURL = canvas.toDataURL("image/png");
-            const a = document.createElement("a");
-            a.href = dataURL;
-            a.download = `Attendance_${weekPeriod}.png`;
-            a.click();
+            };
+            reader.readAsText(file);
         }
 
         updateTable();
