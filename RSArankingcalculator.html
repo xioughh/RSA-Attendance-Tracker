@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redstorm Voting Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            max-width: 100%;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: relative;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .header .menu-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .top-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .section {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        h2 {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #aaa;
+        }
+        .remove-btn {
+            background-color: #DC3545;
+            padding: 5px;
+            margin-left: 10px;
+            width: auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .voting-section {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            margin-top: 10px;
+        }
+        #voting-menu {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .voting-menu-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            background-color: #e0e0e0;
+        }
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .vote-scores, .top-models {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .top-models ol {
+            padding-left: 20px;
+        }
+        @media (min-width: 768px) {
+            .top-section {
+                flex-direction: row;
+            }
+            .results-section {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="menu-icon">&#9776;</span>
+            <h1>REDSTORM AGENCY RANKING CALCULATOR</h1>
+        </div>
+        <!-- Top Section: Adding Voters, Criteria, Models -->
+        <div class="top-section">
+            <div class="section voters-section">
+                <h2>Voters</h2>
+                <input type="text" id="voter-name" placeholder="Voter Name">
+                <button id="add-voter">Add Voter</button>
+                <ul id="voters-list"></ul>
+            </div>
+            <div class="section criteria-section">
+                <h2>Criteria</h2>
+                <input type="text" id="criteria-name" placeholder="Criteria Name">
+                <input type="number" id="criteria-value" placeholder="Value (%)" min="0">
+                <button id="add-criteria">Add Criteria</button>
+                <ul id="criteria-list"></ul>
+                <p id="criteria-total">Total: 0%</p>
+            </div>
+            <div class="section models-section">
+                <h2>Models</h2>
+                <input type="text" id="model-name" placeholder="Model Name">
+                <button id="add-model">Add Model</button>
+                <ul id="models-list"></ul>
+            </div>
+        </div>
+
+        <!-- Voting Section -->
+        <div class="voting-section">
+            <h2>Submit Vote</h2>
+            <select id="select-voter">
+                <option value="">Select Voter</option>
+            </select>
+            <select id="select-model">
+                <option value="">Select Model</option>
+            </select>
+            <div id="voting-menu" class="voting-menu-disabled">
+                <h3>Enter Scores</h3>
+                <!-- Criteria inputs will be added here -->
+            </div>
+            <button id="submit-vote">Submit Vote</button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <div class="vote-scores">
+                <h2>Vote Scores</h2>
+                <ul id="vote-scores-list"></ul>
+            </div>
+            <div class="top-models">
+                <h2>Top 3 Models</h2>
+                <ol id="top-models-list"></ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let voters = [];
+        let criteria = [];
+        let models = [];
+        let votes = [];
+        let criteriaTotal = 0;
+
+        // DOM Elements
+        const votersList = document.getElementById('voters-list');
+        const criteriaList = document.getElementById('criteria-list');
+        const modelsList = document.getElementById('models-list');
+        const selectVoter = document.getElementById('select-voter');
+        const selectModel = document.getElementById('select-model');
+        const votingMenu = document.getElementById('voting-menu');
+        const voteScoresList = document.getElementById('vote-scores-list');
+        const topModelsList = document.getElementById('top-models-list');
+        const criteriaTotalDisplay = document.getElementById('criteria-total');
+
+        // Event Listeners for Adding
+        document.getElementById('add-voter').addEventListener('click', addVoter);
+        document.getElementById('add-criteria').addEventListener('click', addCriteria);
+        document.getElementById('add-model').addEventListener('click', addModel);
+        document.getElementById('submit-vote').addEventListener('click', submitVote);
+
+        // Voting Selection
+        let selectedVoter = '';
+        let selectedModel = '';
+        selectVoter.addEventListener('change', function() {
+            selectedVoter = this.value;
+            updateVotingMenu();
+        });
+        selectModel.addEventListener('change', function() {
+            selectedModel = this.value;
+            updateVotingMenu();
+        });
+
+        // Functions for Voters
+        function addVoter() {
+            const name = document.getElementById('voter-name').value.trim();
+            if (name && !voters.includes(name)) {
+                voters.push(name);
+                updateVotersList();
+                updateSelectVoter();
+                document.getElementById('voter-name').value = '';
+            }
+        }
+
+        function removeVoter(voter) {
+            voters = voters.filter(v => v !== voter);
+            votes = votes.filter(vote => vote.voter !== voter);
+            updateVotersList();
+            updateSelectVoter();
+            updateVoteScoresList();
+            updateTopModels();
+        }
+
+        function updateVotersList() {
+            votersList.innerHTML = '';
+            voters.forEach(voter => {
+                const li = document.createElement('li');
+                li.textContent = voter;
+                const btn = document.createElement('button');
+                btn.textContent = 'x';
+                btn.className = 'remove-btn';
+                btn.onclick = () => removeVoter(voter);
+                li.appendChild(btn);
+                votersList.appendChild(li);
+            });
+        }
+
+        function updateSelectVoter() {
+            selectVoter.innerHTML = '<option value="">Select Voter</option>';
+            voters.forEach(voter => {
+                const option = document.createElement('option');
+                option.value = voter;
+                option.textContent = voter;
+                selectVoter.appendChild(option);
+            });
+        }
+
+        // Functions for Criteria
+        function addCriteria() {
+            const name = document.getElementById('criteria-name').value.trim();
+            const value = parseFloat(document.getElementById('criteria-value').value);
+            if (name && !isNaN(value) && value > 0 && !criteria.some(c => c.name === name)) {
+                if (criteriaTotal + value > 100) {
+                    alert("Adding this criterion would exceed 100% total.");
+                    return;
+                }
+                criteria.push({ name, value });
+                criteriaTotal += value;
+                updateCriteriaList();
+                updateCriteriaTotal();
+                document.getElementById('criteria-name').value = '';
+                document.getElementById('criteria-value').value = '';
+            }
+        }
+
+        function removeCriteria(name) {
+            const crit = criteria.find(c => c.name === name);
+            if (crit) {
+                criteriaTotal -= crit.value;
+            }
+            criteria = criteria.filter(c => c.name !== name);
+            updateCriteriaList();
+            updateCriteriaTotal();
+            updateVoteScoresList();
+            updateTopModels();
+        }
+
+        function updateCriteriaList() {
+            criteriaList.innerHTML = '';
+            criteria.forEach(crit => {
+                const li = document.createElement('li');
+                li.textContent = `${crit.name}: ${crit.value}%`;
+                const btn = document.createElement('button');
+                btn.textContent = 'x';
+                btn.className = 'remove-btn';
+                btn.onclick = () => removeCriteria(crit.name);
+                li.appendChild(btn);
+                criteriaList.appendChild(li);
+            });
+        }
+
+        function updateCriteriaTotal() {
+            criteriaTotalDisplay.textContent = `Total: ${criteriaTotal}%`;
+        }
+
+        // Functions for Models
+        function addModel() {
+            if (criteriaTotal !== 100) {
+                alert('Criteria total must be 100% before adding models.');
+                return;
+            }
+            const name = document.getElementById('model-name').value.trim();
+            if (name && !models.includes(name)) {
+                models.push(name);
+                updateModelsList();
+                updateSelectModel();
+                document.getElementById('model-name').value = '';
+            }
+        }
+
+        function removeModel(model) {
+            models = models.filter(m => m !== model);
+            votes = votes.filter(vote => vote.model !== model);
+            updateModelsList();
+            updateSelectModel();
+            updateVoteScoresList();
+            updateTopModels();
+        }
+
+        function updateModelsList() {
+            modelsList.innerHTML = '';
+            models.forEach(model => {
+                const li = document.createElement('li');
+                li.textContent = model;
+                const btn = document.createElement('button');
+                btn.textContent = 'x';
+                btn.className = 'remove-btn';
+                btn.onclick = () => removeModel(model);
+                li.appendChild(btn);
+                modelsList.appendChild(li);
+            });
+        }
+
+        function updateSelectModel() {
+            selectModel.innerHTML = '<option value="">Select Model</option>';
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                selectModel.appendChild(option);
+            });
+        }
+
+        // Voting Functions
+        function updateVotingMenu() {
+            votingMenu.innerHTML = '<h3>Enter Scores</h3>';
+            criteria.forEach(crit => {
+                const label = document.createElement('label');
+                label.textContent = `${crit.name} (0-100): `;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = 0;
+                input.max = 100;
+                input.className = 'criteria-score';
+                input.disabled = !selectedVoter || !selectedModel;
+                label.appendChild(input);
+                votingMenu.appendChild(label);
+                votingMenu.appendChild(document.createElement('br'));
+            });
+            if (selectedVoter && selectedModel) {
+                votingMenu.classList.remove('voting-menu-disabled');
+                // Prefill if existing vote
+                const existingVote = votes.find(v => v.voter === selectedVoter && v.model === selectedModel);
+                if (existingVote) {
+                    const scoreInputs = document.querySelectorAll('.criteria-score');
+                    criteria.forEach((crit, i) => {
+                        scoreInputs[i].value = existingVote.scores[crit.name] || 0;
+                    });
+                }
+            } else {
+                votingMenu.classList.add('voting-menu-disabled');
+            }
+        }
+
+        function submitVote() {
+            if (criteriaTotal !== 100) {
+                alert("Criteria total must be 100% to submit votes.");
+                return;
+            }
+            if (!selectedVoter || !selectedModel) {
+                alert("Please select a voter and a model.");
+                return;
+            }
+            const scoreInputs = document.querySelectorAll('.criteria-score');
+            const newScores = {};
+            let valid = true;
+            criteria.forEach((crit, i) => {
+                const score = parseFloat(scoreInputs[i].value);
+                if (isNaN(score) || score < 0 || score > 100) {
+                    valid = false;
+                } else {
+                    newScores[crit.name] = score;
+                }
+            });
+            if (!valid) {
+                alert("Please enter valid scores (0-100) for all criteria.");
+                return;
+            }
+            const voteIndex = votes.findIndex(v => v.voter === selectedVoter && v.model === selectedModel);
+            if (voteIndex !== -1) {
+                // Update existing vote
+                votes[voteIndex].scores = newScores;
+            } else {
+                // Add new vote
+                votes.push({ voter: selectedVoter, model: selectedModel, scores: newScores });
+            }
+            updateVoteScoresList();
+            updateTopModels();
+            // Reset selection
+            selectVoter.value = '';
+            selectModel.value = '';
+            selectedVoter = '';
+            selectedModel = '';
+            updateVotingMenu();
+        }
+
+        function removeVote(voter, model) {
+            votes = votes.filter(v => v.voter !== voter || v.model !== model);
+            updateVoteScoresList();
+            updateTopModels();
+            if (selectedVoter === voter && selectedModel === model) {
+                updateVotingMenu();
+            }
+        }
+
+        function calculateTotal(vote) {
+            return criteria.reduce((sum, crit) => {
+                const score = vote.scores[crit.name] || 0;
+                return sum + crit.value * (score / 100);
+            }, 0);
+        }
+
+        function updateVoteScoresList() {
+            voteScoresList.innerHTML = '';
+            votes.forEach(vote => {
+                const total = calculateTotal(vote);
+                const li = document.createElement('li');
+                li.textContent = `${vote.voter} total vote score to ${vote.model} = ${total.toFixed(2)}`;
+                const btn = document.createElement('button');
+                btn.textContent = 'Remove';
+                btn.className = 'remove-btn';
+                btn.onclick = () => removeVote(vote.voter, vote.model);
+                li.appendChild(btn);
+                voteScoresList.appendChild(li);
+            });
+        }
+
+        function updateTopModels() {
+            const modelScores = {};
+            models.forEach(model => {
+                const modelVotes = votes.filter(vote => vote.model === model);
+                if (modelVotes.length > 0) {
+                    const sum = modelVotes.reduce((acc, vote) => acc + calculateTotal(vote), 0);
+                    const average = sum / modelVotes.length;
+                    modelScores[model] = average;
+                } else {
+                    modelScores[model] = 0;
+                }
+            });
+            const sortedModels = Object.entries(modelScores)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+            topModelsList.innerHTML = '';
+            sortedModels.forEach(([model, score]) => {
+                const li = document.createElement('li');
+                li.textContent = `${model}: ${score.toFixed(2)}`;
+                topModelsList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
