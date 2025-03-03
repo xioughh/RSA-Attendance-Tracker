@@ -193,22 +193,16 @@
                 <option value="Model">Model</option>
                 <option value="Officer">Officer</option>
             </select>
-            <button onclick="addMember()">
-                <i class="fas fa-user-plus"></i> Add Member
-            </button>
+            <button onclick="addMember()"><i class="fas fa-user-plus"></i> Add Member</button>
         </div>
         <div class="history-section">
             <label for="historySelect">Load Past Week:</label>
             <select id="historySelect" onchange="loadHistory(this.value)">
                 <option value="">Select a past week</option>
             </select>
-            <button id="returnBtn" onclick="loadLatestData()" style="display: none;">
-                <i class="fas fa-arrow-left"></i> Return to Current Week
-            </button>
+            <button id="returnBtn" onclick="loadLatestData()" style="display: none;"><i class="fas fa-arrow-left"></i> Return to Current Week</button>
         </div>
-        <div class="spinner" id="spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-        </div>
+        <div class="spinner" id="spinner"><i class="fas fa-spinner fa-spin"></i></div>
         <table id="attendanceTable">
             <thead>
                 <tr>
@@ -229,10 +223,10 @@
         <div class="info-section">
             <div class="legend">
                 <h3>Legend:</h3>
-                <p><span style="color: #28a745;">✅</span> = Present</p>
-                <p><span style="color: #ffc107;">☑️</span> = Valid Excuse</p>
-                <p><span style="color: #dc3545;">❌</span> = Absent</p>
-                <p><span style="color: #6c757d;">❔</span> = No Data</p>
+                <p>✅ = Present</p>
+                <p>☑️ = Valid Excuse</p>
+                <p>❌ = Absent</p>
+                <p>❔ = No Data</p>
             </div>
             <div class="summary">
                 <h3>Summary</h3>
@@ -242,34 +236,21 @@
             </div>
         </div>
         <div class="button-section">
-            <button id="saveLocalBtn" onclick="saveData()">
-                <i class="fas fa-save"></i> Save as Local Data
-            </button>
+            <button id="saveLocalBtn" onclick="saveData()"><i class="fas fa-save"></i> Save as Local Data</button>
             <input type="file" id="loadFile" style="display: none;" onchange="loadData(event)">
-            <button onclick="document.getElementById('loadFile').click()">
-                <i class="fas fa-upload"></i> Load Local Data
-            </button>
-            <button id="loadLatestBtn" onclick="loadLatestData()">
-                <i class="fas fa-cloud-download-alt"></i> Load Latest Data
-            </button>
-            <button id="saveLatestBtn" onclick="saveLatestData()">
-                <i class="fas fa-cloud-upload-alt"></i> Save to Latest Data
-            </button>
-            <button id="newWeekBtn" onclick="newWeek()">
-                <i class="fas fa-calendar-alt"></i> New Week
-            </button>
-            <button id="outputPNGBtn" onclick="outputAsPNG()">
-                <i class="fas fa-image"></i> Output as PNG
-            </button>
+            <button onclick="document.getElementById('loadFile').click()"><i class="fas fa-upload"></i> Load Local Data</button>
+            <button id="loadLatestBtn" onclick="loadLatestData()"><i class="fas fa-cloud-download-alt"></i> Load Latest Data</button>
+            <button id="saveLatestBtn" onclick="saveLatestData()"><i class="fas fa-cloud-upload-alt"></i> Save to Latest Data</button>
+            <button id="newWeekBtn" onclick="newWeek()"><i class="fas fa-calendar-alt"></i> New Week</button>
+            <button id="outputPNGBtn" onclick="outputAsPNG()"><i class="fas fa-image"></i> Output as PNG</button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCcsJEiE6c1O4cc1HLXUgtDDRNjG7kNOwr8FjNRfnxjrq4Q_O8ruqUnpbDSx-sVmLM/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_WEB_APP_URL/exec'; // Replace with your Web app URL from Step 2
         let weekPeriod = '';
         let members = [];
         let isHistoryView = false;
-        let historyWeeks = [];
 
         const weekInput = document.getElementById('weekPeriod');
         weekInput.onchange = () => weekPeriod = weekInput.value.trim();
@@ -301,7 +282,6 @@
                 tbody.appendChild(row);
             });
             updateSummary();
-            updateHistoryDropdown();
         }
 
         function addMember() {
@@ -334,17 +314,6 @@
             document.getElementById('totalMembers').textContent = activeMembers.length;
             document.getElementById('totalOfficers').textContent = activeMembers.filter(m => m.tag === 'Officer').length;
             document.getElementById('totalModels').textContent = activeMembers.filter(m => m.tag === 'Model').length;
-        }
-
-        function updateHistoryDropdown() {
-            const select = document.getElementById('historySelect');
-            select.innerHTML = '<option value="">Select a past week</option>';
-            historyWeeks.forEach(week => {
-                const option = document.createElement('option');
-                option.value = week;
-                option.text = week;
-                select.appendChild(option);
-            });
         }
 
         function saveData() {
@@ -381,10 +350,7 @@
         function loadLatestData() {
             showSpinner(true);
             fetch(SCRIPT_URL)
-                .then(response => {
-                    if (!response.ok) throw new Error('Fetch failed: ' + response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     weekPeriod = data.week;
                     members = data.members;
@@ -396,7 +362,6 @@
                     showSpinner(false);
                 })
                 .catch(error => {
-                    console.error('Error loading latest data:', error);
                     alert('Error loading data: ' + error.message);
                     showSpinner(false);
                 });
@@ -413,13 +378,10 @@
                 body: JSON.stringify({ week: weekPeriod, members })
             })
                 .then(() => {
-                    setTimeout(() => {
-                        alert('Data saved successfully!');
-                        loadLatestData();
-                    }, 1000); // Delay to ensure server sync
+                    alert('Data saved successfully!');
+                    showSpinner(false);
                 })
                 .catch(error => {
-                    console.error('Error saving data:', error);
                     alert('Error saving data: ' + error.message);
                     showSpinner(false);
                 });
@@ -437,27 +399,36 @@
                 body: JSON.stringify({ action: 'newWeek', newPeriod: newWeekPeriod })
             })
                 .then(() => {
-                    setTimeout(() => {
-                        alert(`New week started: ${newWeekPeriod}. Farewelled members removed.`);
-                        historyWeeks.push(weekPeriod); // Update local history
-                        loadLatestData();
-                    }, 1000); // Delay to ensure server sync
+                    alert(`New week started: ${newWeekPeriod}. Farewelled members removed.`);
+                    loadLatestData();
                 })
                 .catch(error => {
-                    console.error('Error starting new week:', error);
                     alert('Error starting new week: ' + error.message);
                     showSpinner(false);
                 });
+        }
+
+        function loadHistoryList() {
+            fetch(`${SCRIPT_URL}?action=getHistoryList`)
+                .then(response => response.json())
+                .then(weeks => {
+                    const select = document.getElementById('historySelect');
+                    select.innerHTML = '<option value="">Select a past week</option>';
+                    weeks.forEach(week => {
+                        const option = document.createElement('option');
+                        option.value = week;
+                        option.text = week;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading history list:', error));
         }
 
         function loadHistory(week) {
             if (!week) return loadLatestData();
             showSpinner(true);
             fetch(`${SCRIPT_URL}?action=getHistory&week=${encodeURIComponent(week)}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Fetch failed: ' + response.status);
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     weekPeriod = week;
                     members = data;
@@ -469,7 +440,6 @@
                     showSpinner(false);
                 })
                 .catch(error => {
-                    console.error('Error loading history:', error);
                     alert('Error loading history: ' + error.message);
                     showSpinner(false);
                 });
@@ -577,7 +547,8 @@
             link.click();
         }
 
-        updateTable(); // Start with local empty data
+        loadLatestData();
+        loadHistoryList();
     </script>
 </body>
 </html>
