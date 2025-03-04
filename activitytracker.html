@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* Same CSS as original - unchanged */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1C2526, #2E3537);
@@ -99,21 +100,29 @@
             cursor: pointer;
             width: 60px;
         }
-        .summary-section {
+        .legend-summary {
             background: #2E3537;
             padding: 15px;
             border-radius: 10px;
             border: 2px solid #8B0000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
         }
-        .summary-section h3 {
+        .legend-section, .summary-section {
+            flex: 1;
+            min-width: 280px;
+        }
+        .legend-section h3, .summary-section h3 {
             color: #D32F2F;
             margin-bottom: 10px;
             font-weight: 700;
             text-transform: uppercase;
         }
-        .summary-section p {
+        .legend-section p, .summary-section p {
             margin: 8px 0;
             color: #B0BEC5;
             font-size: 1.1em;
@@ -244,6 +253,14 @@
                 font-size: 1em;
                 justify-content: center;
             }
+            .legend-summary {
+                flex-direction: column;
+                padding: 10px;
+                margin: 10px 0;
+            }
+            .legend-section, .summary-section {
+                min-width: 100%;
+            }
             .modal-buttons {
                 flex-direction: column;
                 gap: 10px;
@@ -276,10 +293,19 @@
             </thead>
             <tbody id="activitiesBody"></tbody>
         </table>
-        <div class="summary-section">
-            <h3>Summary</h3>
-            <p>Models with Complete Activities: <span id="completeCount">0</span></p>
-            <p>Names: <span id="completeNames">-</span></p>
+        <div class="legend-summary">
+            <div class="legend-section">
+                <h3>Legend</h3>
+                <p>✅ = Completed</p>
+                <p>❌ = No Activity</p>
+                <p>⏰ = Late</p>
+                <p>❔ = No Data</p>
+            </div>
+            <div class="summary-section">
+                <h3>Summary</h3>
+                <p>Models with Complete Activities: <span id="completeCount">0</span></p>
+                <p>Names: <span id="completeNames">-</span></p>
+            </div>
         </div>
         <div class="button-section">
             <button onclick="saveActivities()"><i class="fas fa-download"></i> Save Activities</button>
@@ -565,7 +591,7 @@
             showAlert("Success", "New week started: " + weekPeriod);
         }
 
-        // Export PNG
+        // Export PNG - Fixed layout
         function exportPNG() {
             if (!weekPeriod) {
                 showAlert("Error", "Please set a week period.");
@@ -574,6 +600,7 @@
             const scale = 3;
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
+
             const padding = 30;
             const headerHeight = 80;
             const rowHeight = 50;
@@ -581,7 +608,7 @@
             const actWidth = 100;
             const tableWidth = nameWidth + 3 * actWidth;
             const tableHeight = rowHeight * (activeModels.length + 1);
-            const infoHeight = 150;
+            const infoHeight = 200;
             const footerHeight = 40;
             const totalWidth = tableWidth + 2 * padding;
             const totalHeight = headerHeight + tableHeight + infoHeight + footerHeight + 2 * padding;
@@ -651,24 +678,28 @@
                 });
             });
 
+            // Info Section (Summary on left, Legend on right)
             const infoY = padding + headerHeight + tableHeight + 20;
             ctx.fillStyle = "#33393B";
             ctx.fillRect(padding, infoY, tableWidth, infoHeight);
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
+
+            // Summary (Left)
             ctx.textAlign = "left";
             const summaryX = padding + 20;
+            ctx.fillStyle = "#D32F2F";
+            ctx.font = "bold 18px Poppins";
             ctx.fillText("Summary", summaryX, infoY + 20);
             ctx.fillStyle = "#B0BEC5";
             ctx.font = "14px Poppins";
             ctx.fillText(`Models with Complete Activities: ${document.getElementById("completeCount").textContent}`, summaryX, infoY + 50);
             const namesText = `Names: ${document.getElementById("completeNames").textContent}`;
-            const wrappedNames = wrapText(ctx, namesText, tableWidth - 40, summaryX, infoY + 75, 20);
+            wrapText(ctx, namesText, tableWidth / 2 - 40, summaryX, infoY + 75, 20);
 
+            // Legend (Right)
+            const legendX = padding + tableWidth - 150; // Adjusted to fit on right
+            const legendY = infoY + 20;
             ctx.fillStyle = "#D32F2F";
             ctx.font = "bold 18px Poppins";
-            const legendX = padding + 20;
-            const legendY = infoY + wrappedNames.nextY + 20;
             ctx.fillText("Legend", legendX, legendY);
             ctx.fillStyle = "#B0BEC5";
             ctx.font = "14px Poppins";
@@ -677,7 +708,8 @@
                 ctx.fillText(item, legendX, legendY + 25 + i * 20);
             });
 
-            const footerY = legendY + 100;
+            // Footer
+            const footerY = infoY + infoHeight + 10;
             ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
             ctx.fillRect(padding, footerY, tableWidth, footerHeight);
             ctx.fillStyle = "#FFD700";
@@ -699,15 +731,12 @@
         function wrapText(ctx, text, maxWidth, x, y, lineHeight) {
             const words = text.split(" ");
             let line = "";
-            let lines = [];
             let currentY = y;
-
             for (let n = 0; n < words.length; n++) {
                 const testLine = line + words[n] + " ";
                 const metrics = ctx.measureText(testLine);
                 const testWidth = metrics.width;
                 if (testWidth > maxWidth && n > 0) {
-                    lines.push(line);
                     ctx.fillText(line, x, currentY);
                     line = words[n] + " ";
                     currentY += lineHeight;
@@ -715,7 +744,6 @@
                     line = testLine;
                 }
             }
-            lines.push(line);
             ctx.fillText(line, x, currentY);
             return { nextY: currentY + lineHeight };
         }
