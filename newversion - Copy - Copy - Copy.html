@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker - Redstorm Modeling Agency</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1C2526, #2E3537);
+            color: #E0E0E0;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+            animation: fadeInBody 1s ease-in-out;
+        }
+        h1 {
+            text-align: center;
+            color: #D32F2F;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        #clock-container {
+            text-align: center;
+        }
+        #clock {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            min-width: 220px;
+            display: inline-block;
+        }
+        #ph-time {
+            font-size: 1em;
+            color: #B0BEC5;
+            margin-top: 5px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2E3537;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            animation: fadeInContainer 1s ease-in-out;
+        }
+        .input-section, .button-section {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        label {
+            color: #B0BEC5;
+            font-weight: 400;
+            font-size: 1.1em;
+        }
+        input[type="date"], #newMemberName, select {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #E0E0E0;
+            color: #1C2526;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            max-width: 220px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        input[type="date"]:focus, #newMemberName:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 5px #D32F2F;
+        }
+        #weekPeriodDisplay {
+            color: #B0BEC5;
+            font-size: 1.1em;
+            margin-left: 10px;
+        }
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #D32F2F, #FF5252);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            background: linear-gradient(45deg, #8B0000, #D32F2F);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            animation: pulse 1s infinite;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+        }
+        button.remove-btn {
+            background: linear-gradient(45deg, #FF5252, #FF8A80);
+            padding: 8px 16px;
+            font-size: 0.9em;
+            height: 36px;
+        }
+        button.remove-btn:hover {
+            background: linear-gradient(45deg, #D32F2F, #FF5252);
+        }
+        button.farewell-btn {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            width: 130px;
+            height: 36px;
+            justify-content: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #2E3537;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            table-layout: fixed;
+        }
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #4A5557;
+        }
+        th:nth-child(1) { width: 15%; }
+        th:nth-child(2) { width: 10%; }
+        th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6), th:nth-child(7), th:nth-child(8), th:nth-child(9) { width: 7%; }
+        th:nth-child(10) { width: 23%; }
+        tr {
+            height: 60px;
+        }
+        th {
+            background: linear-gradient(45deg, #8B0000, #D32F2F);
+            color: #FFFFFF;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) {
+            background-color: #3A4345;
+        }
+        tr:nth-child(odd) {
+            background-color: #2E3537;
+        }
+        tr.new-row {
+            animation: slideInBounce 0.5s ease-out forwards;
+        }
+        td {
+            color: #E0E0E0;
+        }
+        .farewell-row td {
+            color: #757575;
+        }
+        td select {
+            width: 60px;
+            padding: 6px;
+            border: none;
+            background: #E0E0E0;
+            color: #1C2526;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .legend-summary {
+            background: #2E3537;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #8B0000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .legend-section, .summary-section {
+            flex: 1;
+            min-width: 280px;
+        }
+        .legend-section h3, .summary-section h3 {
+            color: #D32F2F;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .legend-section p, .summary-section p {
+            margin: 8px 0;
+            color: #B0BEC5;
+            font-size: 1.1em;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #2E3537;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: fadeInModal 0.3s ease-in-out;
+        }
+        .modal-content h3 {
+            color: #D32F2F;
+            margin-bottom: 15px;
+        }
+        .modal-content p {
+            color: #E0E0E0;
+            margin-bottom: 20px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            background: #E0E0E0;
+            color: #1C2526;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .modal-buttons button {
+            padding: 10px 20px;
+            min-width: 100px;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInBody {
+            from { opacity: 0; background: #1C2526; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInContainer {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInBounce {
+            from { transform: translateX(-30px); opacity: 0; }
+            80% { transform: translateX(10px); opacity: 1; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 10px;
+                margin: 0 5px;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            #clock {
+                font-size: 1.8em;
+                min-width: 180px;
+                padding: 8px 15px;
+            }
+            #ph-time {
+                font-size: 0.9em;
+            }
+            .input-section, .button-section {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+            }
+            .input-section label {
+                width: 100%;
+                text-align: left;
+            }
+            input[type="date"], #newMemberName, select {
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            #weekPeriodDisplay {
+                width: 100%;
+                text-align: center;
+                margin-left: 0;
+            }
+            button {
+                width: 100%;
+                max-width: 300px;
+                padding: 12px;
+                font-size: 1em;
+                justify-content: center;
+            }
+            .legend-summary {
+                flex-direction: column;
+                padding: 10px;
+                margin: 10px 0;
+            }
+            .legend-section, .summary-section {
+                min-width: 100%;
+            }
+            table {
+                font-size: 14px;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            td select {
+                width: 50px;
+            }
+            .action-buttons {
+                flex-direction: column;
+                gap: 8px;
+                height: auto;
+                align-items: stretch;
+                padding: 5px 0;
+            }
+            button.remove-btn, button.farewell-btn {
+                width: 100%;
+                margin: 0;
+                height: 40px;
+                font-size: 0.9em;
+            }
+            th:last-child, td:last-child {
+                min-width: 120px;
+            }
+            tr {
+                height: auto;
+                min-height: 80px;
+            }
+            th, td {
+                padding: 10px;
+            }
+            .modal-content {
+                padding: 15px;
+            }
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .modal-buttons button {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Attendance Tracker - Redstorm Modeling Agency</h1>
+            <div id="clock-container">
+                <div id="clock"></div>
+                <div id="ph-time">PH Time</div>
+            </div>
+        </div>
+        <div class="input-section">
+            <label for="weekStart">Week Start:</label>
+            <input type="date" id="weekStart">
+            <span id="weekPeriodDisplay"></span>
+        </div>
+        <div class="input-section">
+            <label for="newMemberName">New Member Name:</label>
+            <input type="text" id="newMemberName" placeholder="Enter name">
+            <label for="newMemberTag">Tag:</label>
+            <select id="newMemberTag">
+                <option value="Model">Model</option>
+                <option value="Officer">Officer</option>
+            </select>
+            <button onclick="addMember()"><i class="fas fa-user-plus"></i> Add Member</button>
+        </div>
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Tag</th>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                    <th>Sun</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="membersBody"></tbody>
+        </table>
+        <div class="legend-summary">
+            <div class="legend-section">
+                <h3>Legend:</h3>
+                <p>✅ = Present</p>
+                <p>☑️ = Valid Excuse</p>
+                <p>❌ = Absent</p>
+                <p>❔ = No Data</p>
+            </div>
+            <div class="summary-section">
+                <h3>Summary</h3>
+                <p><i class="fas fa-users"></i> Total Members: <span id="totalMembers">0</span></p>
+                <p><i class="fas fa-user-tie"></i> Total Officers: <span id="totalOfficers">0</span></p>
+                <p><i class="fas fa-user"></i> Total Models: <span id="totalModels">0</span></p>
+            </div>
+        </div>
+        <div class="button-section">
+            <button onclick="saveData()"><i class="fas fa-download"></i> Save Local</button>
+            <input type="file" id="loadFile" style="display: none;" onchange="loadData(event)">
+            <button onclick="document.getElementById('loadFile').click()"><i class="fas fa-upload"></i> Load Local</button>
+            <button onclick="loadLatestData()"><i class="fas fa-cloud-download-alt"></i> Load Latest</button>
+            <button onclick="saveLatestData()"><i class="fas fa-cloud-upload-alt"></i> Save Latest</button>
+            <button onclick="newWeekPrompt()"><i class="fas fa-calendar-plus"></i> New Week</button>
+            <button onclick="outputAsPNG()"><i class="fas fa-image"></i> Output PNG</button>
+        </div>
+    </div>
+
+    <!-- Modal Templates -->
+    <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <h3 id="alertTitle"></h3>
+            <p id="alertMessage"></p>
+            <div class="modal-buttons">
+                <button onclick="closeModal('alertModal')">OK</button>
+            </div>
+        </div>
+    </div>
+    <div id="newWeekModal" class="modal">
+        <div class="modal-content">
+            <h3>New Week</h3>
+            <p>Select the new week start date:</p>
+            <input type="date" id="newWeekStart">
+            <span id="newWeekPeriodDisplay"></span>
+            <div class="modal-buttons">
+                <button onclick="confirmNewWeek()">OK</button>
+                <button onclick="closeModal('newWeekModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Compatibility SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlWS8HxSJp1Dwl_aMaDvoWvYu3CDZdgWM",
+            authDomain: "rsa-attendance-tracker.firebaseapp.com",
+            projectId: "rsa-attendance-tracker",
+            storageBucket: "rsa-attendance-tracker.firebasestorage.app",
+            messagingSenderId: "912723437410",
+            appId: "1:912723437410:web:1c50e842f080adbfd12e3b"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let weekPeriod = "";
+        let members = [];
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const phTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+            const timeString = phTime.toLocaleTimeString("en-US", { hour12: true });
+            document.getElementById("clock").textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Modal Functions
+        function showAlert(title, message) {
+            document.getElementById("alertTitle").textContent = title;
+            document.getElementById("alertMessage").textContent = message;
+            document.getElementById("alertModal").style.display = "flex";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        // Week Period
+        const weekStartInput = document.getElementById("weekStart");
+        weekStartInput.onchange = updateWeekPeriod;
+
+        function updateWeekPeriod() {
+            const start = new Date(weekStartInput.value);
+            if (!weekStartInput.value) return;
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            const options = { month: "short", day: "numeric" };
+            weekPeriod = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+            document.getElementById("weekPeriodDisplay").textContent = weekPeriod;
+        }
+
+        // Table Management
+        function updateTable(isNewRow = false) {
+            const tbody = document.getElementById("membersBody");
+            const currentMembers = Array.from(tbody.children).map(row => row.querySelector("td").textContent);
+            tbody.innerHTML = members.length === 0 ? "<tr><td colspan='10'>No members added yet.</td></tr>" : "";
+            members.forEach((member, index) => {
+                const row = document.createElement("tr");
+                if (member.farewell) row.classList.add("farewell-row");
+                if (isNewRow && !currentMembers.includes(member.name)) row.classList.add("new-row");
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.tag}</td>
+                    ${member.attendance.map((status, day) => `
+                        <td>
+                            <select onchange="updateAttendance(${index}, ${day}, this.value)" ${member.farewell ? 'disabled' : ''}>
+                                <option value="❔" ${status === "❔" ? "selected" : ""}>❔</option>
+                                <option value="✅" ${status === "✅" ? "selected" : ""}>✅</option>
+                                <option value="☑️" ${status === "☑️" ? "selected" : ""}>☑️</option>
+                                <option value="❌" ${status === "❌" ? "selected" : ""}>❌</option>
+                            </select>
+                        </td>
+                    `).join("")}
+                    <td>
+                        <div class="action-buttons">
+                            <button class="remove-btn" onclick="removeMember(${index})"><i class="fas fa-trash"></i> Remove</button>
+                            <button class="farewell-btn" onclick="toggleFarewell(${index})"><i class="fas fa-handshake-slash"></i> ${member.farewell ? "Undo Farewell" : "Farewell"}</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            updateSummary();
+        }
+
+        function addMember() {
+            const name = document.getElementById("newMemberName").value.trim();
+            const tag = document.getElementById("newMemberTag").value;
+            if (name) {
+                members.push({
+                    name: name,
+                    tag: tag,
+                    attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                    farewell: false
+                });
+                updateTable(true);
+                document.getElementById("newMemberName").value = "";
+            } else {
+                showAlert("Error", "Please enter a member name.");
+            }
+        }
+
+        function removeMember(index) {
+            members.splice(index, 1);
+            updateTable();
+        }
+
+        function toggleFarewell(index) {
+            members[index].farewell = !members[index].farewell;
+            updateTable();
+        }
+
+        function updateAttendance(memberIndex, dayIndex, value) {
+            members[memberIndex].attendance[dayIndex] = value;
+            updateTable();
+        }
+
+        function updateSummary() {
+            const activeMembers = members.filter(member => !member.farewell);
+            document.getElementById("totalMembers").textContent = activeMembers.length;
+            document.getElementById("totalOfficers").textContent = activeMembers.filter(m => m.tag === "Officer").length;
+            document.getElementById("totalModels").textContent = activeMembers.filter(m => m.tag === "Model").length;
+        }
+
+        // Local Save/Load
+        function saveData() {
+            if (!weekPeriod) {
+                showAlert("Error", "Please select a week period before saving.");
+                return;
+            }
+            const data = JSON.stringify({ week: weekPeriod, members: members });
+            const blob = new Blob([data], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Attendance_${weekPeriod}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadData(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        weekPeriod = data.week || "";
+                        members = data.members || [];
+                        const [start] = weekPeriod.split(" - ").map(date => {
+                            const [month, day] = date.split(" ");
+                            const year = new Date().getFullYear();
+                            return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
+                        });
+                        weekStartInput.value = start;
+                        updateWeekPeriod();
+                        updateTable();
+                    } catch (err) {
+                        showAlert("Error", "Invalid file format.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Firebase Save/Load
+        function loadLatestData() {
+            db.collection("attendance").doc("latest").get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        weekPeriod = data.week || "";
+                        members = data.members.map(member => ({
+                            name: member.name,
+                            tag: member.tag,
+                            attendance: member.attendance || ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                            farewell: member.farewell || false
+                        }));
+                        const [start] = weekPeriod.split(" - ").map(date => {
+                            const [month, day] = date.split(" ");
+                            const year = new Date().getFullYear();
+                            return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
+                        });
+                        weekStartInput.value = start;
+                        updateWeekPeriod();
+                        updateTable();
+                        showAlert("Success", "Latest data loaded from Firebase!");
+                    } else {
+                        showAlert("Info", "No data found in Firebase.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading data:", error);
+                    showAlert("Error", "Error loading data from Firebase: " + error.message);
+                });
+        }
+
+        function saveLatestData() {
+            if (!weekPeriod) {
+                showAlert("Error", "Please select a week period before saving.");
+                return;
+            }
+            const data = { week: weekPeriod, members: members };
+            db.collection("attendance").doc("latest").set(data)
+                .then(() => {
+                    showAlert("Success", "Data saved to Firebase successfully!");
+                })
+                .catch(error => {
+                    console.error("Error saving data:", error);
+                    showAlert("Error", "Error saving data to Firebase: " + error.message);
+                });
+        }
+
+        // New Week
+        function newWeekPrompt() {
+            const newWeekStartInput = document.getElementById("newWeekStart");
+            newWeekStartInput.value = "";
+            document.getElementById("newWeekPeriodDisplay").textContent = "";
+            newWeekStartInput.onchange = function() {
+                const start = new Date(newWeekStartInput.value);
+                if (!newWeekStartInput.value) return;
+                const end = new Date(start);
+                end.setDate(start.getDate() + 6);
+                const options = { month: "short", day: "numeric" };
+                const period = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+                document.getElementById("newWeekPeriodDisplay").textContent = period;
+            };
+            document.getElementById("newWeekModal").style.display = "flex";
+        }
+
+        function confirmNewWeek() {
+            const newWeekStartInput = document.getElementById("newWeekStart");
+            const start = new Date(newWeekStartInput.value);
+            if (!newWeekStartInput.value) {
+                showAlert("Error", "Please select a new week start date.");
+                return;
+            }
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            const options = { month: "short", day: "numeric" };
+            weekPeriod = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+            weekStartInput.value = newWeekStartInput.value;
+            updateWeekPeriod();
+            members = members.filter(member => !member.farewell).map(member => ({
+                ...member,
+                attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"]
+            }));
+            updateTable();
+            closeModal("newWeekModal");
+            showAlert("Success", "New week started: " + weekPeriod + ". Farewelled members removed.");
+        }
+
+        // PNG Output
+        function outputAsPNG() {
+            if (!weekPeriod) {
+                showAlert("Error", "Please select a week period before outputting.");
+                return;
+            }
+            if (members.length === 0) {
+                showAlert("Error", "No members to output.");
+                return;
+            }
+            const scale = 3;
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.font = "16px Poppins";
+
+            const memberNames = ["Member", ...members.map(m => m.name)];
+            const maxMemberWidth = Math.max(...memberNames.map(name => ctx.measureText(name).width));
+            const nameWidth = Math.max(150, maxMemberWidth + 40);
+            const tagWidth = 100;
+            const cellWidth = 60;
+            const rowHeight = 50;
+            const headerHeight = 60;
+            const weekHeight = 40;
+            const tableHeight = headerHeight + (members.length + 1) * rowHeight;
+            const legendItems = ["✅ = Present", "☑️ = Valid Excuse", "❌ = Absent", "❔ = No Data (Upcoming)"];
+            const legendLineHeight = 25;
+            const legendHeight = 20 + (legendItems.length * legendLineHeight);
+            const totalHeight = weekHeight + tableHeight + legendHeight;
+            const totalWidth = nameWidth + tagWidth + 7 * cellWidth;
+
+            canvas.width = totalWidth * scale;
+            canvas.height = totalHeight * scale;
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = "#2E3537";
+            ctx.fillRect(0, 0, totalWidth, totalHeight);
+
+            ctx.fillStyle = "#E0E0E0";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("Attendance Week: " + weekPeriod, totalWidth / 2, weekHeight / 2 + 10);
+
+            const headers = ["Member", "Tag", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            let x = 0;
+            const columnWidths = [nameWidth, tagWidth, ...Array(7).fill(cellWidth)];
+            headers.forEach((header, i) => {
+                ctx.fillStyle = "#8B0000";
+                ctx.fillRect(x, weekHeight, columnWidths[i], headerHeight);
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillText(header, x + columnWidths[i] / 2, weekHeight + headerHeight / 2);
+                x += columnWidths[i];
+            });
+
+            ctx.strokeStyle = "#8B0000";
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= members.length + 1; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, weekHeight + headerHeight + i * rowHeight);
+                ctx.lineTo(totalWidth, weekHeight + headerHeight + i * rowHeight);
+                ctx.stroke();
+            }
+            x = 0;
+            columnWidths.forEach(width => {
+                ctx.beginPath();
+                ctx.moveTo(x, weekHeight + headerHeight);
+                ctx.lineTo(x, weekHeight + tableHeight);
+                ctx.stroke();
+                x += width;
+            });
+
+            members.forEach((member, index) => {
+                const y = weekHeight + headerHeight + (index + 1) * rowHeight;
+                let colX = 0;
+                if (member.farewell) {
+                    ctx.fillStyle = "#757575";
+                    ctx.fillText(member.name, colX + nameWidth / 2, y + rowHeight / 4);
+                    ctx.fillStyle = "#D32F2F";
+                    ctx.fillText("(Farewell)", colX + nameWidth / 2, y + rowHeight / 2 + 10);
+                } else {
+                    ctx.fillStyle = "#E0E0E0";
+                    ctx.fillText(member.name, colX + nameWidth / 2, y + rowHeight / 2);
+                }
+                colX += nameWidth;
+                ctx.fillStyle = member.farewell ? "#757575" : "#E0E0E0";
+                ctx.fillText(member.tag, colX + tagWidth / 2, y + rowHeight / 2);
+                colX += tagWidth;
+                member.attendance.forEach(status => {
+                    ctx.fillText(status, colX + cellWidth / 2, y + rowHeight / 2);
+                    colX += cellWidth;
+                });
+            });
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#E0E0E0";
+            let legendY = weekHeight + tableHeight + 20;
+            legendItems.forEach(item => {
+                ctx.fillText(item, 10, legendY);
+                legendY += legendLineHeight;
+            });
+
+            const dataURL = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.href = dataURL;
+            link.download = `Attendance_${weekPeriod}.png`;
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => document.body.removeChild(link), 100);
+        }
+
+        // Initial Table Update
+        updateTable();
+    </script>
+</body>
+</html>
