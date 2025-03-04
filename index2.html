@@ -471,12 +471,8 @@
     </div>
 
     <script>
-        // GitHub configuration
-        const GITHUB_USERNAME = "xioughh";
-        const GITHUB_REPO = "RSA-Attendance-Tracker";
-        const GITHUB_FILE_PATH = "attendance.json";
-        const GITHUB_TOKEN = "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";
-        const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+        // Google Apps Script endpoint URL - Replace with your deployed URL
+        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxZ4VyWn7g-owAyfnjq4mxlGUqUdAPpMzGvQn0nS8q3Msy7-3kfc2t7d8jJZnmNGLC/exec";
 
         let weekPeriod = "";
         let members = [];
@@ -503,20 +499,6 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = "none";
-        }
-
-        // Helper function to encode Unicode strings for btoa
-        function b64EncodeUnicode(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-                return String.fromCharCode('0x' + p1);
-            }));
-        }
-
-        // Helper function to decode Unicode strings from atob
-        function b64DecodeUnicode(str) {
-            return decodeURIComponent(atob(str).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
         }
 
         // Update Week Period from Date Input
@@ -653,36 +635,31 @@
 
         async function loadLatestData() {
             try {
-                const response = await fetch(GITHUB_API_URL, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                        "Accept": "application/vnd.github.v3+json"
-                    }
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?action=loadLatestData`, {
+                    method: "GET"
                 });
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
+                const result = await response.json();
+                if (result.success) {
+                    const parsedData = result.data;
+                    weekPeriod = parsedData.week || "";
+                    members = parsedData.members.map(member => ({
+                        name: member.name,
+                        tag: member.tag,
+                        attendance: member.attendance || ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                        farewell: member.farewell || false
+                    }));
+                    const [start] = weekPeriod.split(" - ").map(date => {
+                        const [month, day] = date.split(" ");
+                        const year = new Date().getFullYear();
+                        return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
+                    });
+                    weekStartInput.value = start;
+                    updateWeekPeriod();
+                    updateTable();
+                    showAlert("Success", "Latest data loaded successfully!");
+                } else {
+                    throw new Error(result.error);
                 }
-                const data = await response.json();
-                const content = b64DecodeUnicode(data.content);
-                const parsedData = JSON.parse(content);
-                
-                weekPeriod = parsedData.week || "";
-                members = parsedData.members.map(member => ({
-                    name: member.name,
-                    tag: member.tag,
-                    attendance: member.attendance || ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
-                    farewell: member.farewell || false
-                }));
-                const [start] = weekPeriod.split(" - ").map(date => {
-                    const [month, day] = date.split(" ");
-                    const year = new Date().getFullYear();
-                    return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
-                });
-                weekStartInput.value = start;
-                updateWeekPeriod();
-                updateTable();
-                showAlert("Success", "Latest data loaded successfully!");
             } catch (error) {
                 console.error("Error:", error);
                 showAlert("Error", "Error loading data: " + error.message);
@@ -695,45 +672,20 @@
                 return;
             }
             try {
-                const getResponse = await fetch(GITHUB_API_URL, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                        "Accept": "application/vnd.github.v3+json"
-                    }
-                });
-                let sha = null;
-                if (getResponse.ok) {
-                    const fileData = await getResponse.json();
-                    sha = fileData.sha;
-                } else if (getResponse.status !== 404) {
-                    throw new Error(`Failed to fetch file SHA: ${getResponse.status}`);
-                }
-
                 const data = { week: weekPeriod, members: members };
-                const content = b64EncodeUnicode(JSON.stringify(data));
-                
-                const response = await fetch(GITHUB_API_URL, {
-                    method: "PUT",
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?action=saveLatestData`, {
+                    method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                        "Accept": "application/vnd.github.v3+json",
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                        message: `Update attendance data for ${weekPeriod}`,
-                        content: content,
-                        sha: sha
-                    })
+                    body: JSON.stringify(data)
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`GitHub API error: ${response.status} - ${errorData.message}`);
+                const result = await response.json();
+                if (result.success) {
+                    showAlert("Success", "Data saved successfully!");
+                } else {
+                    throw new Error(result.error);
                 }
-
-                console.log("Saved data:", data);
-                showAlert("Success", "Data saved successfully!");
             } catch (error) {
                 console.error("Error:", error);
                 showAlert("Error", "Error saving data: " + error.message);
@@ -889,6 +841,7 @@
             }, 100);
         }
 
+        // Initialize table on load
         updateTable();
     </script>
 </body>
