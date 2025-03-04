@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* [Style section remains unchanged] */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1C2526, #2E3537);
@@ -347,7 +348,6 @@
             <button onclick="loadActivities()"><i class="fas fa-upload"></i> Load Activities</button>
             <button onclick="setLateActivities()"><i class="fas fa-clock"></i> Set Late Activities</button>
             <button onclick="refreshMembers()"><i class="fas fa-sync-alt"></i> Refresh Members</button>
-            <button onclick="newWeekPrompt()"><i class="fas fa-calendar-plus"></i> New Week</button>
             <button onclick="outputPNG()"><i class="fas fa-image"></i> Output PNG</button>
         </div>
     </div>
@@ -358,18 +358,6 @@
             <p id="alertMessage"></p>
             <div class="modal-buttons">
                 <button onclick="closeModal('alertModal')">OK</button>
-            </div>
-        </div>
-    </div>
-    <div id="newWeekModal" class="modal">
-        <div class="modal-content">
-            <h3>New Week</h3>
-            <p>Select the new week start date:</p>
-            <input type="date" id="newWeekStart">
-            <span id="newWeekPeriodDisplay"></span>
-            <div class="modal-buttons">
-                <button onclick="confirmNewWeek()">OK</button>
-                <button onclick="closeModal('newWeekModal')">Cancel</button>
             </div>
         </div>
     </div>
@@ -425,14 +413,10 @@
         }
 
         // Week period calculation
-        function calculateWeekPeriod(weekStart) {
-            const start = new Date(weekStart);
-            const end = new Date(start);
-            end.setDate(start.getDate() + 6);
-            const options = { month: "short", day: "numeric" };
-            weekPeriod = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+        function updateWeekPeriod(weekStart, weekDisplay) {
+            currentWeekStart = weekStart;
+            weekPeriod = weekDisplay;
             document.getElementById("weekPeriodDisplay").textContent = weekPeriod;
-            return weekPeriod;
         }
 
         // Get activity deadlines
@@ -523,8 +507,7 @@
                 .then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
-                        currentWeekStart = data.weekStart;
-                        calculateWeekPeriod(currentWeekStart);
+                        updateWeekPeriod(data.weekStart, data.week); // Fetch week period from Attendance Tracker
                         const existingActivities = {};
                         activeModels.forEach(model => {
                             existingActivities[model.name] = model.activities;
@@ -536,7 +519,7 @@
                                 activities: existingActivities[member.name] || ["❔", "❔", "❔"]
                             }));
                         updateTable();
-                        showAlert("Success", "Members refreshed from Attendance Tracker!");
+                        showAlert("Success", "Members and week period refreshed from Attendance Tracker!");
                     } else {
                         showAlert("Info", "No attendance data found.");
                         activeModels = [];
@@ -556,6 +539,7 @@
             showLoading();
             const data = {
                 weekStart: currentWeekStart,
+                week: weekPeriod, // Save week period along with data
                 models: activeModels.map(model => ({
                     name: model.name,
                     activities: model.activities,
@@ -595,68 +579,10 @@
                 .finally(() => hideLoading());
         }
 
-        // Archive activities
-        function archiveActivities(previousWeekStart) {
-            const previousPeriod = calculateWeekPeriod(previousWeekStart);
-            const modelsToArchive = activeModels.filter(model => model.activities.some(status => status !== "❔"));
-            if (modelsToArchive.length > 0) {
-                const archiveData = {
-                    weekPeriod: previousPeriod,
-                    models: modelsToArchive.map(model => ({
-                        name: model.name,
-                        activities: model.activities,
-                        hasCompleteActivities: model.activities.every(status => status === "✅")
-                    }))
-                };
-                db.collection("activities").doc(previousPeriod).set(archiveData)
-                    .then(() => console.log(`Activities archived for ${previousPeriod}`))
-                    .catch(error => showAlert("Error", "Failed to archive activities: " + error.message));
-            }
-        }
-
-        // New week prompt
-        function newWeekPrompt() {
-            const newWeekStartInput = document.getElementById("newWeekStart");
-            newWeekStartInput.value = "";
-            document.getElementById("newWeekPeriodDisplay").textContent = "";
-            newWeekStartInput.onchange = function() {
-                const start = new Date(newWeekStartInput.value);
-                if (!newWeekStartInput.value) return;
-                const end = new Date(start);
-                end.setDate(start.getDate() + 6);
-                const options = { month: "short", day: "numeric" };
-                const period = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
-                document.getElementById("newWeekPeriodDisplay").textContent = period;
-            };
-            document.getElementById("newWeekModal").style.display = "flex";
-        }
-
-        // Confirm new week
-        function confirmNewWeek() {
-            showLoading();
-            const newWeekStartInput = document.getElementById("newWeekStart");
-            if (!newWeekStartInput.value) {
-                hideLoading();
-                showAlert("Error", "Please select a new week start date.");
-                return;
-            }
-            const previousWeekStart = currentWeekStart;
-            currentWeekStart = newWeekStartInput.value;
-            calculateWeekPeriod(currentWeekStart);
-            archiveActivities(previousWeekStart);
-            activeModels.forEach(model => model.activities = ["❔", "❔", "❔"]);
-            updateTable();
-            closeModal("newWeekModal");
-            setTimeout(() => {
-                hideLoading();
-                showAlert("Success", "New week started: " + weekPeriod);
-            }, 500);
-        }
-
-        // Output PNG with space instead of newline for "Model" and date in filename
+        // Output PNG
         function outputPNG() {
             if (!weekPeriod) {
-                showAlert("Error", "Please set a week period.");
+                showAlert("Error", "Please set a week period by refreshing members.");
                 return;
             }
             showLoading();
@@ -746,12 +672,10 @@
                 });
             });
 
-            // Info Section (Summary on left, Legend on right)
             const infoY = padding + headerHeight + tableHeight + 20;
             ctx.fillStyle = "#33393B";
             ctx.fillRect(padding, infoY, tableWidth, infoHeight);
 
-            // Summary (Left)
             ctx.textAlign = "left";
             const summaryX = padding + 20;
             ctx.fillStyle = "#D32F2F";
@@ -763,7 +687,6 @@
             const namesText = `Names: ${document.getElementById("completeNames").textContent}`;
             wrapText(ctx, namesText, tableWidth / 2 - 40, summaryX, infoY + 75, 20);
 
-            // Legend (Right)
             const legendX = padding + tableWidth - 150;
             const legendY = infoY + 20;
             ctx.fillStyle = "#D32F2F";
@@ -776,7 +699,6 @@
                 ctx.fillText(item, legendX, legendY + 25 + i * 20);
             });
 
-            // Footer
             const footerY = infoY + infoHeight + 10;
             ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
             ctx.fillRect(padding, footerY, tableWidth, footerHeight);
@@ -789,7 +711,7 @@
             const dataURL = canvas.toDataURL("image/png");
             const link = document.createElement("a");
             link.href = dataURL;
-            link.download = `Activities_${weekPeriod}_${currentWeekStart}.png`; // Added date to filename
+            link.download = `Activities_${weekPeriod}_${currentWeekStart}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
