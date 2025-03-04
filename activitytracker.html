@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Same CSS as original - unchanged */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1C2526, #2E3537);
@@ -184,14 +183,21 @@
             color: #E0E0E0;
             margin-bottom: 20px;
         }
-        .modal-content input {
-            width: 100%;
+        .modal-content input[type="date"] {
             padding: 10px;
-            margin-bottom: 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             background: #E0E0E0;
             color: #1C2526;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            max-width: 220px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .modal-content input[type="date"]:focus {
+            outline: none;
+            box-shadow: 0 0 5px #D32F2F;
         }
         .modal-buttons {
             display: flex;
@@ -201,6 +207,30 @@
         .modal-buttons button {
             padding: 10px 20px;
             min-width: 100px;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #D32F2F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         @keyframes fadeInBody {
             from { opacity: 0; background: #1C2526; }
@@ -269,6 +299,11 @@
                 width: 100%;
                 max-width: 200px;
             }
+            .modal-content input[type="date"] {
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
@@ -303,7 +338,7 @@
             </div>
             <div class="summary-section">
                 <h3>Summary</h3>
-                <p>Models with Complete Activities: <span id="completeCount">0</span></p>
+                <p><i class="fas fa-check-circle"></i> Models with Complete Activities: <span id="completeCount">0</span></p>
                 <p>Names: <span id="completeNames">-</span></p>
             </div>
         </div>
@@ -313,7 +348,7 @@
             <button onclick="setLateActivities()"><i class="fas fa-clock"></i> Set Late Activities</button>
             <button onclick="refreshMembers()"><i class="fas fa-sync-alt"></i> Refresh Members</button>
             <button onclick="newWeekPrompt()"><i class="fas fa-calendar-plus"></i> New Week</button>
-            <button onclick="exportPNG()"><i class="fas fa-image"></i> Export PNG</button>
+            <button onclick="outputPNG()"><i class="fas fa-image"></i> Output PNG</button>
         </div>
     </div>
 
@@ -337,6 +372,10 @@
                 <button onclick="closeModal('newWeekModal')">Cancel</button>
             </div>
         </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -375,6 +414,14 @@
         }
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = "none";
+        }
+
+        // Loading Overlay
+        function showLoading() {
+            document.getElementById("loadingOverlay").style.display = "flex";
+        }
+        function hideLoading() {
+            document.getElementById("loadingOverlay").style.display = "none";
         }
 
         // Week period calculation
@@ -452,6 +499,7 @@
 
         // Set late activities
         function setLateActivities() {
+            showLoading();
             const currentPHTime = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
             const activityDates = getActivityDates(currentWeekStart);
             activeModels.forEach(model => {
@@ -462,11 +510,15 @@
                 });
             });
             updateTable();
-            showAlert("Success", "Late activities updated!");
+            setTimeout(() => {
+                hideLoading();
+                showAlert("Success", "Late activities updated!");
+            }, 500);
         }
 
         // Refresh members from attendance
         function refreshMembers() {
+            showLoading();
             db.collection("attendance").doc("latest").get()
                 .then(doc => {
                     if (doc.exists) {
@@ -491,7 +543,8 @@
                         updateTable();
                     }
                 })
-                .catch(error => showAlert("Error", "Failed to refresh members: " + error.message));
+                .catch(error => showAlert("Error", "Failed to refresh members: " + error.message))
+                .finally(() => hideLoading());
         }
 
         // Save activities
@@ -500,6 +553,7 @@
                 showAlert("Error", "Week start not set.");
                 return;
             }
+            showLoading();
             const data = {
                 weekStart: currentWeekStart,
                 models: activeModels.map(model => ({
@@ -510,11 +564,13 @@
             };
             db.collection("activities").doc("latest").set(data)
                 .then(() => showAlert("Success", "Activities saved successfully!"))
-                .catch(error => showAlert("Error", "Failed to save activities: " + error.message));
+                .catch(error => showAlert("Error", "Failed to save activities: " + error.message))
+                .finally(() => hideLoading());
         }
 
         // Load activities
         function loadActivities() {
+            showLoading();
             db.collection("activities").doc("latest").get()
                 .then(doc => {
                     if (doc.exists) {
@@ -535,7 +591,8 @@
                         }
                     }
                 })
-                .catch(error => showAlert("Error", "Failed to load activities: " + error.message));
+                .catch(error => showAlert("Error", "Failed to load activities: " + error.message))
+                .finally(() => hideLoading());
         }
 
         // Archive activities
@@ -576,8 +633,10 @@
 
         // Confirm new week
         function confirmNewWeek() {
+            showLoading();
             const newWeekStartInput = document.getElementById("newWeekStart");
             if (!newWeekStartInput.value) {
+                hideLoading();
                 showAlert("Error", "Please select a new week start date.");
                 return;
             }
@@ -588,16 +647,20 @@
             activeModels.forEach(model => model.activities = ["❔", "❔", "❔"]);
             updateTable();
             closeModal("newWeekModal");
-            showAlert("Success", "New week started: " + weekPeriod);
+            setTimeout(() => {
+                hideLoading();
+                showAlert("Success", "New week started: " + weekPeriod);
+            }, 500);
         }
 
-        // Export PNG - Fixed layout
-        function exportPNG() {
+        // Output PNG with space instead of newline for "Model" and date in filename
+        function outputPNG() {
             if (!weekPeriod) {
                 showAlert("Error", "Please set a week period.");
                 return;
             }
-            const scale = 3;
+            showLoading();
+            const scale = 4;
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
@@ -635,7 +698,7 @@
             ctx.strokeStyle = "#4A5557";
             ctx.lineWidth = 1;
 
-            const headers = ["Model", "Activity 1\nMon", "Activity 2\nWed", "Activity 3\nFri"];
+            const headers = ["Model ", "Activity 1 (Mon)", "Activity 2 (Wed)", "Activity 3 (Fri)"];
             const colWidths = [nameWidth, actWidth, actWidth, actWidth];
             let x = padding;
             headers.forEach((header, i) => {
@@ -643,10 +706,15 @@
                 ctx.fillRect(x, padding + headerHeight, colWidths[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font = "bold 14px Poppins";
-                const lines = header.split("\n");
-                ctx.fillText(lines[0], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 - 10);
-                ctx.font = "12px Poppins";
-                ctx.fillText(lines[1], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 + 10);
+                if (i === 0) {
+                    ctx.fillText(header.trim(), x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2);
+                } else {
+                    const lines = header.split(" ");
+                    ctx.fillText(lines[0], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 - 10);
+                    ctx.font = "12px Poppins";
+                    ctx.fillText(lines[1], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 + 10);
+                    ctx.font = "bold 14px Poppins"; // Reset font
+                }
                 x += colWidths[i];
             });
 
@@ -696,7 +764,7 @@
             wrapText(ctx, namesText, tableWidth / 2 - 40, summaryX, infoY + 75, 20);
 
             // Legend (Right)
-            const legendX = padding + tableWidth - 150; // Adjusted to fit on right
+            const legendX = padding + tableWidth - 150;
             const legendY = infoY + 20;
             ctx.fillStyle = "#D32F2F";
             ctx.font = "bold 18px Poppins";
@@ -721,10 +789,11 @@
             const dataURL = canvas.toDataURL("image/png");
             const link = document.createElement("a");
             link.href = dataURL;
-            link.download = `Activities_${weekPeriod}.png`;
+            link.download = `Activities_${weekPeriod}_${currentWeekStart}.png`; // Added date to filename
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            hideLoading();
         }
 
         // Wrap text for summary names
