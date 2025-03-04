@@ -614,7 +614,7 @@
                 showAlert("Error", "Please select a week period before saving.");
                 return;
             }
-            const data = JSON.stringify({ week: weekPeriod, members: members });
+            const data = JSON.stringify({ week: weekPeriod, members: members, weekStart: weekStartInput.value });
             const blob = new Blob([data], { type: "text/plain" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -635,12 +635,7 @@
                         const data = JSON.parse(e.target.result);
                         weekPeriod = data.week || "";
                         members = data.members || [];
-                        const [start] = weekPeriod.split(" - ").map(date => {
-                            const [month, day] = date.split(" ");
-                            const year = new Date().getFullYear();
-                            return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
-                        });
-                        weekStartInput.value = start;
+                        weekStartInput.value = data.weekStart || "";
                         updateWeekPeriod();
                         updateTable();
                     } catch (err) {
@@ -664,12 +659,7 @@
                             attendance: member.attendance || ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
                             farewell: member.farewell || false
                         }));
-                        const [start] = weekPeriod.split(" - ").map(date => {
-                            const [month, day] = date.split(" ");
-                            const year = new Date().getFullYear();
-                            return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
-                        });
-                        weekStartInput.value = start;
+                        weekStartInput.value = data.weekStart || "";
                         updateWeekPeriod();
                         updateTable();
                         showAlert("Success", "Latest data loaded from Firebase!");
@@ -688,7 +678,11 @@
                 showAlert("Error", "Please select a week period before saving.");
                 return;
             }
-            const data = { week: weekPeriod, members: members };
+            const data = { 
+                week: weekPeriod, 
+                members: members, 
+                weekStart: weekStartInput.value // Store the raw input value
+            };
             db.collection("attendance").doc("latest").set(data)
                 .then(() => {
                     showAlert("Success", "Data saved to Firebase successfully!");
