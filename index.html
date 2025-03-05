@@ -759,7 +759,7 @@
                 .finally(() => hideLoading());
         }
 
-        // New Week
+        // New Week with History Saving
         function newWeekPrompt() {
             const newWeekStartInput = document.getElementById("newWeekStart");
             newWeekStartInput.value = "";
@@ -778,24 +778,69 @@
 
         function confirmNewWeek() {
             const newWeekStartInput = document.getElementById("newWeekStart");
-            const start = new Date(newWeekStartInput.value);
+            const newStart = new Date(newWeekStartInput.value);
             if (!newWeekStartInput.value) {
                 showAlert("Error", "Please select a new week start date.");
                 return;
             }
-            const end = new Date(start);
-            end.setDate(start.getDate() + 6);
+            if (!weekPeriod || !weekStartInput.value) {
+                // If no current week exists, just set the new week
+                setNewWeek(newStart, newWeekStartInput.value);
+                closeModal("newWeekModal");
+                showAlert("Success", "New week started: " + weekPeriod);
+                return;
+            }
+
+            showLoading();
+            const currentWeekStart = weekStartInput.value;
+            const attendanceData = {
+                week: weekPeriod,
+                members: members,
+                weekStart: currentWeekStart
+            };
+
+            // Fetch current activities data
+            db.collection("activities").doc("latest").get()
+                .then(doc => {
+                    const activitiesData = doc.exists ? doc.data() : { week: weekPeriod, models: [] };
+                    const historyData = {
+                        week: weekPeriod,
+                        weekStart: currentWeekStart,
+                        attendance: attendanceData,
+                        activities: activitiesData,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    // Save to history collection
+                    return db.collection("history").doc(currentWeekStart).set(historyData);
+                })
+                .then(() => {
+                    // Reset for new week
+                    setNewWeek(newStart, newWeekStartInput.value);
+                    hideLoading();
+                    closeModal("newWeekModal");
+                    showAlert("Success", `New week started: ${weekPeriod}. Previous week's data saved to history.`);
+                })
+                .catch(error => {
+                    console.error("Error saving history:", error);
+                    hideLoading();
+                    closeModal("newWeekModal");
+                    showAlert("Error", "Failed to save previous week's data: " + error.message);
+                });
+        }
+
+        function setNewWeek(newStart, newWeekStartValue) {
+            const end = new Date(newStart);
+            end.setDate(newStart.getDate() + 6);
             const options = { month: "short", day: "numeric" };
-            weekPeriod = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
-            weekStartInput.value = newWeekStartInput.value;
+            weekPeriod = `${newStart.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+            weekStartInput.value = newWeekStartValue;
             updateWeekPeriod();
             members = members.filter(member => !member.farewell).map(member => ({
                 ...member,
                 attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"]
             }));
             updateTable();
-            closeModal("newWeekModal");
-            showAlert("Success", "New week started: " + weekPeriod + ". Farewelled members removed.");
         }
 
         // Rebuilt PNG Output
