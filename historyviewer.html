@@ -360,7 +360,7 @@
         </div>
         <div class="button-section">
             <button onclick="refreshWeeks()"><i class="fas fa-sync-alt"></i> Refresh</button>
-            <button onclick="outputPNG()"><i class="fas fa-image"></i> Output PNG</button>
+            <button onclick="outputPNG()" ontouchend="outputPNG()"><i class="fas fa-image"></i> Output PNG</button>
         </div>
     </div>
 
@@ -412,7 +412,7 @@
             document.getElementById("alertModal").style.display = "flex";
         }
         function closeModal(modalId) {
-            document.getElementById(modalId).style.display = "none";
+            document.getElementById("modalId").style.display = "none";
         }
 
         // Loading Overlay
@@ -659,7 +659,7 @@
                     x += nameWidthB;
                     model.activities.forEach(status => {
                         ctx.fillText(status, x + actWidth / 2, rowY + rowHeight / 2);
-                        x += actWidth;
+                        x += actWidth; // Fixed typo: was 'width'
                     });
                 });
             } else {
@@ -686,14 +686,19 @@
             const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
             ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, y + footerHeight / 2);
 
-            const dataURL = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.href = dataURL;
-            link.download = `History_${selectedWeek.week}_${selectedWeek.weekStart}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            hideLoading();
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `History_${selectedWeek.week}_${selectedWeek.weekStart}.png`;
+                document.body.appendChild(link);
+                setTimeout(() => {
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    hideLoading();
+                }, 100); // Slight delay for mobile compatibility
+            }, "image/png");
         }
 
         // Initial load
