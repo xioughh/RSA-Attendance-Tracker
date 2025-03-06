@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* [Style section unchanged from your original] */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1C2526, #2E3537);
@@ -475,7 +476,7 @@
             <button onclick="loadLatestData()"><i class="fas fa-cloud-download-alt"></i> Load Latest</button>
             <button onclick="saveLatestData()"><i class="fas fa-cloud-upload-alt"></i> Save Latest</button>
             <button onclick="newWeekPrompt()"><i class="fas fa-calendar-plus"></i> New Week</button>
-            <button onclick="outputAsPNG()"><i class="fas fa-image"></i> Output PNG</button>
+            <button onclick="outputAsPNG()" ontouchend="outputAsPNG()"><i class="fas fa-image"></i> Output PNG</button>
         </div>
     </div>
 
@@ -843,7 +844,7 @@
             updateTable();
         }
 
-        // Rebuilt PNG Output
+        // Updated PNG Output
         function outputAsPNG() {
             if (!weekPeriod) {
                 showAlert("Error", "Please select a week period before outputting.");
@@ -854,7 +855,8 @@
                 return;
             }
 
-            const scale = 3;
+            showLoading();
+            const scale = 4; // Match Activities Tracker
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
@@ -891,13 +893,6 @@
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(`Attendance: ${weekPeriod}`, totalWidth / 2, padding + headerHeight / 2);
-            ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
-            ctx.shadowBlur = 5;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            ctx.fillText(`Attendance: ${weekPeriod}`, totalWidth / 2, padding + headerHeight / 2);
-            ctx.shadowColor = "transparent";
-            ctx.shadowBlur = 0;
 
             // Table Background
             ctx.fillStyle = "#2E3537";
@@ -905,13 +900,15 @@
             ctx.strokeStyle = "#4A5557";
             ctx.lineWidth = 1;
 
-            // Table Headers
+            // Table Headers with Gradient
             const headers = ["Member", "Tag", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
             const colWidths = [nameWidth, tagWidth, ...Array(7).fill(dayWidth)];
             let x = padding;
-            ctx.fillStyle = "linear-gradient(45deg, #8B0000, #D32F2F)";
             headers.forEach((header, i) => {
-                ctx.fillStyle = "rgba(139, 0, 0, 0.9)";
+                const headerGradient = ctx.createLinearGradient(x, padding + headerHeight, x + colWidths[i], padding + headerHeight + rowHeight);
+                headerGradient.addColorStop(0, "#8B0000");
+                headerGradient.addColorStop(1, "#D32F2F");
+                ctx.fillStyle = headerGradient;
                 ctx.fillRect(x, padding + headerHeight, colWidths[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font = "bold 14px Poppins";
@@ -961,12 +958,12 @@
             const infoY = padding + headerHeight + tableHeight + 20;
             ctx.fillStyle = "#33393B";
             ctx.fillRect(padding, infoY, tableWidth, infoHeight);
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
 
-            // Summary
+            // Summary (Left)
             ctx.textAlign = "left";
             const summaryX = padding + 20;
+            ctx.fillStyle = "#D32F2F";
+            ctx.font = "bold 18px Poppins";
             ctx.fillText("Summary", summaryX, infoY + 20);
             ctx.fillStyle = "#B0BEC5";
             ctx.font = "14px Poppins";
@@ -979,16 +976,17 @@
                 ctx.fillText(item, summaryX, infoY + 45 + i * 25);
             });
 
-            // Legend
+            // Legend (Right, matching Activities Tracker)
+            const legendX = padding + tableWidth - 150;
+            const legendY = infoY + 20;
             ctx.fillStyle = "#D32F2F";
             ctx.font = "bold 18px Poppins";
-            const legendX = padding + tableWidth / 2 + 20;
-            ctx.fillText("Legend", legendX, infoY + 20);
+            ctx.fillText("Legend", legendX, legendY);
             ctx.fillStyle = "#B0BEC5";
             ctx.font = "14px Poppins";
             const legendItems = ["✅  Present", "☑️  Valid Excuse", "❌  Absent", "❔  No Data"];
             legendItems.forEach((item, i) => {
-                ctx.fillText(item, legendX, infoY + 45 + i * 25);
+                ctx.fillText(item, legendX, legendY + 25 + i * 25);
             });
 
             // Footer
@@ -1001,15 +999,20 @@
             const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
             ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, footerY + footerHeight / 2);
 
-            // Download
-            const dataURL = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.href = dataURL;
-            link.download = `Attendance_${weekPeriod}_${weekStartInput.value}.png`;
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => document.body.removeChild(link), 100);
+            // Download with Blob
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `Attendance_${weekPeriod}_${weekStartInput.value}.png`;
+                document.body.appendChild(link);
+                setTimeout(() => {
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    hideLoading();
+                }, 100);
+            }, "image/png");
         }
 
         // Initial Setup
