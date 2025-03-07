@@ -57,37 +57,52 @@
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
             animation: fadeInContainer 1s ease-in-out;
+            overflow-x: hidden;
         }
         .week-selector {
-            margin: 20px 0;
-            max-height: 200px;
-            overflow-y: auto;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+            padding-left: 10px;
         }
         .week-card {
             background: #3A4345;
-            padding: 10px 20px;
+            padding: 15px;
             border-radius: 8px;
             cursor: pointer;
-            text-align: center;
-            font-size: 1.1em;
-            color: #E0E0E0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            min-width: 150px;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-right: 10px;
         }
         .week-card:hover {
-            background: #D32F2F;
+            background: linear-gradient(45deg, #8B0000, #D32F2F);
             transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            animation: pulse 0.8s infinite;
             color: #FFFFFF;
         }
-        .week-card.selected {
+        .week-card.active {
             background: linear-gradient(45deg, #D32F2F, #FF5252);
             color: #FFFFFF;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        .week-card h3 {
+            margin: 0;
+            font-size: 1.2em;
             font-weight: 600;
+        }
+        .week-card p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #B0BEC5;
         }
         .tables-container {
             display: flex;
@@ -106,12 +121,15 @@
             text-align: center;
             text-transform: uppercase;
         }
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 10px; /* Apply radius to wrapper */
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             background: #2E3537;
-            border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
             table-layout: fixed;
         }
@@ -119,6 +137,7 @@
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid #4A5557;
+            overflow: hidden;
         }
         #attendanceTable th:nth-child(1) { width: 25%; }
         #attendanceTable th:nth-child(2) { width: 15%; }
@@ -138,26 +157,6 @@
         tr:nth-child(odd) { background-color: #2E3537; }
         td { color: #E0E0E0; }
         .farewell-row td { color: #757575; }
-        .legend-section {
-            background: #2E3537;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #8B0000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            margin: 20px 0;
-            text-align: center;
-        }
-        .legend-section h3 {
-            color: #D32F2F;
-            margin-bottom: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .legend-section p {
-            margin: 8px 0;
-            color: #B0BEC5;
-            font-size: 1.1em;
-        }
         .button-section {
             margin: 20px 0;
             display: flex;
@@ -232,6 +231,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
+            display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
@@ -266,37 +266,77 @@
             100% { transform: scale(1); }
         }
         @media (max-width: 768px) {
-            body { padding: 5px; }
-            .container { padding: 10px; margin: 0 5px; }
+            body {
+                padding: 5px;
+                overflow-x: hidden;
+            }
+            .container {
+                padding: 15px;
+                margin: 0 auto;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
             .header {
                 flex-direction: column;
                 text-align: center;
                 gap: 10px;
+                margin-bottom: 15px;
             }
             #clock {
                 font-size: 1.8em;
                 min-width: 180px;
                 padding: 8px 15px;
             }
-            #ph-time { font-size: 0.9em; }
+            #ph-time {
+                font-size: 0.9em;
+            }
+            .week-selector {
+                gap: 10px;
+                margin: 15px 0;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+                padding-left: 5px;
+            }
+            .week-card {
+                min-width: 180px;
+                padding: 10px;
+                margin-right: 5px;
+            }
             .tables-container {
                 flex-direction: column;
                 gap: 15px;
+                justify-content: center;
+                align-items: center;
             }
             .table-section {
-                min-width: 100%;
+                min-width: 0;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .table-wrapper {
+                width: 90%; /* Constrain wrapper */
+                margin: 0 auto; /* Center wrapper */
+                overflow-x: auto;
+                border-radius: 10px; /* Ensure curves */
             }
             table {
+                width: auto;
+                min-width: 100%; /* Full width of wrapper */
                 font-size: 14px;
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
+                table-layout: fixed;
             }
-            th, td { padding: 10px; }
-            .week-card { min-width: 120px; }
+            th, td {
+                padding: 10px;
+                overflow: hidden;
+            }
             .button-section {
                 flex-direction: column;
-                gap: 10px;
+                align-items: center; /* Center button */
             }
             button {
                 width: 100%;
@@ -304,6 +344,17 @@
                 padding: 12px;
                 font-size: 1em;
                 justify-content: center;
+            }
+            .modal-content {
+                padding: 15px;
+            }
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .modal-buttons button {
+                width: 100%;
+                max-width: 200px;
             }
         }
     </style>
@@ -321,49 +372,48 @@
         <div class="tables-container">
             <div class="table-section">
                 <h2>Attendance History</h2>
-                <table id="attendanceTable">
-                    <thead>
-                        <tr>
-                            <th>Member</th>
-                            <th>Tag</th>
-                            <th>M</th>
-                            <th>TU</th>
-                            <th>W</th>
-                            <th>TH</th>
-                            <th>F</th>
-                            <th>SA</th>
-                            <th>SU</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceBody"></tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Tag</th>
+                                <th>Mon</th>
+                                <th>Tue</th>
+                                <th>Wed</th>
+                                <th>Thu</th>
+                                <th>Fri</th>
+                                <th>Sat</th>
+                                <th>Sun</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceBody"></tbody>
+                    </table>
+                </div>
             </div>
             <div class="table-section">
                 <h2>Activities History</h2>
-                <table id="activitiesTable">
-                    <thead>
-                        <tr>
-                            <th>Model</th>
-                            <th>ACT1</th>
-                            <th>ACT2</th>
-                            <th>ACT3</th>
-                        </tr>
-                    </thead>
-                    <tbody id="activitiesBody"></tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table id="activitiesTable">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Act 1</th>
+                                <th>Act 2</th>
+                                <th>Act 3</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activitiesBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="legend-section">
-            <h3>Legends</h3>
-            <p>Attendance: ✅ = Present, ☑️ = Valid Excuse, ❌ = Absent, ❔ = No Data</p>
-            <p>Activities: ✅ = Completed, ❌ = No Activity, ⏰ = Late, ❔ = No Data</p>
-        </div>
         <div class="button-section">
-            <button onclick="refreshWeeks()"><i class="fas fa-sync-alt"></i> Refresh</button>
             <button onclick="outputPNG()" ontouchend="outputPNG()"><i class="fas fa-image"></i> Output PNG</button>
         </div>
     </div>
 
+    <!-- Modal Templates -->
     <div id="alertModal" class="modal">
         <div class="modal-content">
             <h3 id="alertTitle"></h3>
@@ -374,12 +424,15 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner"></div>
     </div>
 
+    <!-- Firebase Compatibility SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -390,27 +443,31 @@
             messagingSenderId: "912723437410",
             appId: "1:912723437410:web:1c50e842f080adbfd12e3b"
         };
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let weeks = [];
         let selectedWeek = null;
+        let weeksData = [];
 
-        // Clock update
+        // Clock
         function updateClock() {
             const now = new Date();
             const phTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-            document.getElementById("clock").textContent = phTime.toLocaleTimeString("en-US", { hour12: true });
+            const timeString = phTime.toLocaleTimeString("en-US", { hour12: true });
+            document.getElementById("clock").textContent = timeString;
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Modal functions
+        // Modal Functions
         function showAlert(title, message) {
             document.getElementById("alertTitle").textContent = title;
             document.getElementById("alertMessage").textContent = message;
             document.getElementById("alertModal").style.display = "flex";
         }
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = "none";
         }
@@ -419,102 +476,85 @@
         function showLoading() {
             document.getElementById("loadingOverlay").style.display = "flex";
         }
+
         function hideLoading() {
             document.getElementById("loadingOverlay").style.display = "none";
         }
 
-        // Load weeks from Firebase
+        // Load Weeks
         function loadWeeks() {
             showLoading();
             db.collection("history").orderBy("timestamp", "desc").get()
-                .then(snapshot => {
-                    weeks = snapshot.docs.map(doc => ({
-                        weekStart: doc.id,
-                        week: doc.data().week,
-                        attendance: doc.data().attendance,
-                        activities: doc.data().activities
-                    }));
-                    if (weeks.length > 0) {
-                        selectedWeek = weeks[0]; // Default to most recent
-                        updateWeekSelector();
-                        updateTables();
+                .then(querySnapshot => {
+                    weeksData = [];
+                    const weekSelector = document.getElementById("weekSelector");
+                    weekSelector.innerHTML = "";
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        weeksData.push(data);
+                        const card = document.createElement("div");
+                        card.classList.add("week-card");
+                        card.innerHTML = `
+                            <h3>${data.week}</h3>
+                            <p>${new Date(data.weekStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+                        `;
+                        card.onclick = () => selectWeek(data);
+                        weekSelector.appendChild(card);
+                    });
+                    if (weeksData.length > 0) {
+                        selectWeek(weeksData[0]);
                     } else {
-                        showAlert("Info", "No history data available.");
-                        document.getElementById("attendanceBody").innerHTML = "<tr><td colspan='9'>No Attendance Data Available</td></tr>";
-                        document.getElementById("activitiesBody").innerHTML = "<tr><td colspan='4'>No Activities Data Available</td></tr>";
+                        updateTables({ attendance: { members: [] }, activities: { models: [] } });
+                        showAlert("Info", "No history data found.");
                     }
                 })
-                .catch(error => showAlert("Error", "Failed to load history: " + error.message))
+                .catch(error => {
+                    console.error("Error loading weeks:", error);
+                    showAlert("Error", "Failed to load history: " + error.message);
+                })
                 .finally(() => hideLoading());
         }
 
-        // Update week selector
-        function updateWeekSelector() {
-            const selector = document.getElementById("weekSelector");
-            selector.innerHTML = "";
-            weeks.forEach(week => {
-                const card = document.createElement("div");
-                card.className = "week-card";
-                card.textContent = week.week;
-                if (week.weekStart === selectedWeek.weekStart) card.classList.add("selected");
-                card.onclick = () => {
-                    selectedWeek = week;
-                    updateWeekSelector();
-                    updateTables();
-                };
-                selector.appendChild(card);
-            });
+        function selectWeek(data) {
+            selectedWeek = data;
+            const cards = document.querySelectorAll(".week-card");
+            cards.forEach(card => card.classList.remove("active"));
+            const selectedCard = Array.from(cards).find(card => card.querySelector("h3").textContent === data.week);
+            if (selectedCard) selectedCard.classList.add("active");
+            updateTables(data);
         }
 
-        // Update tables
-        function updateTables() {
+        function updateTables(data) {
             const attendanceBody = document.getElementById("attendanceBody");
             const activitiesBody = document.getElementById("activitiesBody");
 
-            // Attendance Table
-            if (!selectedWeek.attendance || !selectedWeek.attendance.members || selectedWeek.attendance.members.length === 0) {
-                attendanceBody.innerHTML = "<tr><td colspan='9'>No Attendance Data Available</td></tr>";
-            } else {
-                attendanceBody.innerHTML = "";
-                selectedWeek.attendance.members.forEach(member => {
-                    const row = document.createElement("tr");
-                    if (member.farewell) row.classList.add("farewell-row");
-                    row.innerHTML = `
+            attendanceBody.innerHTML = data.attendance.members.length === 0
+                ? "<tr><td colspan='9'>No attendance data available.</td></tr>"
+                : data.attendance.members.map(member => `
+                    <tr ${member.farewell ? 'class="farewell-row"' : ''}>
                         <td>${member.name}</td>
                         <td>${member.tag}</td>
                         ${member.attendance.map(status => `<td>${status}</td>`).join("")}
-                    `;
-                    attendanceBody.appendChild(row);
-                });
-            }
+                    </tr>
+                `).join("");
 
-            // Activities Table
-            if (!selectedWeek.activities || !selectedWeek.activities.models || selectedWeek.activities.models.length === 0) {
-                activitiesBody.innerHTML = "<tr><td colspan='4'>No Activities Data Available</td></tr>";
-            } else {
-                activitiesBody.innerHTML = "";
-                selectedWeek.activities.models.forEach(model => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
+            activitiesBody.innerHTML = data.activities.models.length === 0
+                ? "<tr><td colspan='4'>No activities data available.</td></tr>"
+                : data.activities.models.map(model => `
+                    <tr>
                         <td>${model.name}</td>
-                        ${model.activities.map(status => `<td>${status}</td>`).join("")}
-                    `;
-                    activitiesBody.appendChild(row);
-                });
-            }
+                        ${model.activities.map(activity => `<td>${activity}</td>`).join("")}
+                    </tr>
+                `).join("");
         }
 
-        // Refresh weeks
-        function refreshWeeks() {
-            loadWeeks();
-        }
-
-        // Output PNG
+        // PNG Output
         function outputPNG() {
             if (!selectedWeek) {
-                showAlert("Error", "No week selected.");
+                showAlert("Error", "Please select a week to output.");
                 return;
             }
+
             showLoading();
             const scale = 4;
             const canvas = document.createElement("canvas");
@@ -523,21 +563,20 @@
             const padding = 30;
             const headerHeight = 80;
             const rowHeight = 50;
-            const nameWidthA = 180;
+            const nameWidth = 200;
             const tagWidth = 100;
             const dayWidth = 60;
-            const nameWidthB = 200;
-            const actWidth = 80;
-            const tableWidthA = nameWidthA + tagWidth + 7 * dayWidth;
-            const tableWidthB = nameWidthB + 3 * actWidth;
-            const tableWidth = Math.max(tableWidthA, tableWidthB);
-            const tableHeightA = selectedWeek.attendance?.members?.length ? rowHeight * (selectedWeek.attendance.members.length + 1) : rowHeight * 2;
-            const tableHeightB = selectedWeek.activities?.models?.length ? rowHeight * (selectedWeek.activities.models.length + 1) : rowHeight * 2;
-            const titleHeight = 40;
-            const infoHeight = 100;
+            const actWidth = 60;
+
+            const attendanceTableWidth = nameWidth + tagWidth + 7 * dayWidth;
+            const activitiesTableWidth = nameWidth + 3 * actWidth;
+            const tableWidth = Math.max(attendanceTableWidth, activitiesTableWidth);
+            const attendanceHeight = rowHeight * (selectedWeek.attendance.members.length + 1);
+            const activitiesHeight = rowHeight * (selectedWeek.activities.models.length + 1);
+            const infoHeight = 20;
             const footerHeight = 40;
             const totalWidth = tableWidth + 2 * padding;
-            const totalHeight = headerHeight + titleHeight + tableHeightA + titleHeight + tableHeightB + infoHeight + footerHeight + 2 * padding;
+            const totalHeight = headerHeight + attendanceHeight + activitiesHeight + infoHeight + footerHeight + 3 * padding;
 
             canvas.width = totalWidth * scale;
             canvas.height = totalHeight * scale;
@@ -554,150 +593,121 @@
             ctx.fillStyle = "#FFFFFF";
             ctx.font = "bold 28px Poppins";
             ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
             ctx.fillText(`History: ${selectedWeek.week}`, totalWidth / 2, padding + headerHeight / 2);
 
             let y = padding + headerHeight;
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
-            ctx.fillText("Attendance History", totalWidth / 2, y + titleHeight / 2);
-            y += titleHeight;
-
             ctx.fillStyle = "#2E3537";
-            ctx.fillRect(padding, y, tableWidth, tableHeightA);
+            ctx.fillRect(padding, y, attendanceTableWidth, attendanceHeight);
             ctx.strokeStyle = "#4A5557";
             ctx.lineWidth = 1;
 
-            const headersA = ["Member", "Tag", "M", "TU", "W", "TH", "F", "SA", "SU"];
-            const colWidthsA = [nameWidthA, tagWidth, dayWidth, dayWidth, dayWidth, dayWidth, dayWidth, dayWidth, dayWidth];
+            const attendanceHeaders = ["Member", "Tag", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            const attendanceColWidths = [nameWidth, tagWidth, ...Array(7).fill(dayWidth)];
             let x = padding;
-            headersA.forEach((header, i) => {
-                const headerGradient = ctx.createLinearGradient(x, y, x + colWidthsA[i], y + rowHeight);
+            attendanceHeaders.forEach((header, i) => {
+                const headerGradient = ctx.createLinearGradient(x, y, x + attendanceColWidths[i], y + rowHeight);
                 headerGradient.addColorStop(0, "#8B0000");
                 headerGradient.addColorStop(1, "#D32F2F");
                 ctx.fillStyle = headerGradient;
-                ctx.fillRect(x, y, colWidthsA[i], rowHeight);
+                ctx.fillRect(x, y, attendanceColWidths[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font = "bold 14px Poppins";
-                ctx.fillText(header, x + colWidthsA[i] / 2, y + rowHeight / 2);
-                x += colWidthsA[i];
+                ctx.fillText(header, x + attendanceColWidths[i] / 2, y + rowHeight / 2);
+                x += attendanceColWidths[i];
             });
 
-            for (let i = 0; i <= (selectedWeek.attendance?.members?.length || 1); i++) {
+            for (let i = 0; i <= selectedWeek.attendance.members.length; i++) {
                 ctx.beginPath();
                 ctx.moveTo(padding, y + i * rowHeight);
-                ctx.lineTo(padding + tableWidth, y + i * rowHeight);
+                ctx.lineTo(padding + attendanceTableWidth, y + i * rowHeight);
                 ctx.stroke();
             }
             x = padding;
-            colWidthsA.forEach(width => {
+            attendanceColWidths.forEach(width => {
                 ctx.beginPath();
                 ctx.moveTo(x, y);
-                ctx.lineTo(x, y + tableHeightA);
+                ctx.lineTo(x, y + attendanceHeight);
                 ctx.stroke();
                 x += width;
             });
 
             ctx.font = "14px Poppins";
-            if (selectedWeek.attendance?.members?.length) {
-                selectedWeek.attendance.members.forEach((member, index) => {
-                    const rowY = y + rowHeight + index * rowHeight;
-                    x = padding;
-                    ctx.fillStyle = member.farewell ? "#757575" : "#E0E0E0";
-                    ctx.fillText(member.name, x + nameWidthA / 2, rowY + rowHeight / 2);
-                    x += nameWidthA;
-                    ctx.fillText(member.tag, x + tagWidth / 2, rowY + rowHeight / 2);
-                    x += tagWidth;
-                    member.attendance.forEach(status => {
-                        ctx.fillText(status, x + dayWidth / 2, rowY + rowHeight / 2);
-                        x += dayWidth;
-                    });
-                    if (member.farewell) {
-                        ctx.fillStyle = "#D32F2F";
-                        ctx.font = "italic 12px Poppins";
-                        ctx.fillText("(Farewell)", padding + nameWidthA / 2, rowY + rowHeight / 2 + 15);
-                        ctx.font = "14px Poppins"; // Reset font
-                    }
+            selectedWeek.attendance.members.forEach((member, index) => {
+                const rowY = y + rowHeight + index * rowHeight;
+                x = padding;
+                ctx.fillStyle = member.farewell ? "#757575" : "#E0E0E0";
+                ctx.fillText(member.name, x + nameWidth / 2, rowY + rowHeight / 2);
+                x += nameWidth;
+                ctx.fillText(member.tag, x + tagWidth / 2, rowY + rowHeight / 2);
+                x += tagWidth;
+                member.attendance.forEach(status => {
+                    ctx.fillText(status, x + dayWidth / 2, rowY + rowHeight / 2);
+                    x += dayWidth;
                 });
-            } else {
-                ctx.fillStyle = "#E0E0E0";
-                ctx.fillText("No Attendance Data Available", totalWidth / 2, y + rowHeight * 1.5);
-            }
+                if (member.farewell) {
+                    ctx.fillStyle = "#D32F2F";
+                    ctx.font = "italic 12px Poppins";
+                    ctx.fillText("(Farewell)", padding + nameWidth / 2, rowY + rowHeight / 2 + 15);
+                    ctx.font = "14px Poppins";
+                }
+            });
 
-            y += tableHeightA;
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
-            ctx.fillText("Activities History", totalWidth / 2, y + titleHeight / 2);
-            y += titleHeight;
-
+            y += attendanceHeight + infoHeight;
             ctx.fillStyle = "#2E3537";
-            const activitiesX = padding + (tableWidth - tableWidthB) / 2; // Center the Activities table
-            ctx.fillRect(activitiesX, y, tableWidthB, tableHeightB);
-            const headersB = ["Model", "ACT1", "ACT2", "ACT3"];
-            const colWidthsB = [nameWidthB, actWidth, actWidth, actWidth];
-            x = activitiesX;
-            headersB.forEach((header, i) => {
-                const headerGradient = ctx.createLinearGradient(x, y, x + colWidthsB[i], y + rowHeight);
+            ctx.fillRect(padding, y, activitiesTableWidth, activitiesHeight);
+
+            const activitiesHeaders = ["Model", "Act 1", "Act 2", "Act 3"];
+            const activitiesColWidths = [nameWidth, ...Array(3).fill(actWidth)];
+            x = padding;
+            activitiesHeaders.forEach((header, i) => {
+                const headerGradient = ctx.createLinearGradient(x, y, x + activitiesColWidths[i], y + rowHeight);
                 headerGradient.addColorStop(0, "#8B0000");
                 headerGradient.addColorStop(1, "#D32F2F");
                 ctx.fillStyle = headerGradient;
-                ctx.fillRect(x, y, colWidthsB[i], rowHeight);
+                ctx.fillRect(x, y, activitiesColWidths[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font = "bold 14px Poppins";
-                ctx.fillText(header, x + colWidthsB[i] / 2, y + rowHeight / 2);
-                x += colWidthsB[i];
+                ctx.fillText(header, x + activitiesColWidths[i] / 2, y + rowHeight / 2);
+                x += activitiesColWidths[i];
             });
 
-            for (let i = 0; i <= (selectedWeek.activities?.models?.length || 1); i++) {
+            for (let i = 0; i <= selectedWeek.activities.models.length; i++) {
                 ctx.beginPath();
-                ctx.moveTo(activitiesX, y + i * rowHeight);
-                ctx.lineTo(activitiesX + tableWidthB, y + i * rowHeight);
+                ctx.moveTo(padding, y + i * rowHeight);
+                ctx.lineTo(padding + activitiesTableWidth, y + i * rowHeight);
                 ctx.stroke();
             }
-            x = activitiesX;
-            colWidthsB.forEach(width => {
+            x = padding;
+            activitiesColWidths.forEach(width => {
                 ctx.beginPath();
                 ctx.moveTo(x, y);
-                ctx.lineTo(x, y + tableHeightB);
+                ctx.lineTo(x, y + activitiesHeight);
                 ctx.stroke();
                 x += width;
             });
 
             ctx.font = "14px Poppins";
-            if (selectedWeek.activities?.models?.length) {
-                selectedWeek.activities.models.forEach((model, index) => {
-                    const rowY = y + rowHeight + index * rowHeight;
-                    x = activitiesX;
-                    ctx.fillStyle = "#E0E0E0";
-                    ctx.fillText(model.name, x + nameWidthB / 2, rowY + rowHeight / 2);
-                    x += nameWidthB;
-                    model.activities.forEach(status => {
-                        ctx.fillText(status, x + actWidth / 2, rowY + rowHeight / 2);
-                        x += actWidth;
-                    });
-                });
-            } else {
+            selectedWeek.activities.models.forEach((model, index) => {
+                const rowY = y + rowHeight + index * rowHeight;
+                x = padding;
                 ctx.fillStyle = "#E0E0E0";
-                ctx.fillText("No Activities Data Available", activitiesX + tableWidthB / 2, y + rowHeight * 1.5);
-            }
+                ctx.fillText(model.name, x + nameWidth / 2, rowY + rowHeight / 2);
+                x += nameWidth;
+                model.activities.forEach(activity => {
+                    ctx.fillText(activity, x + actWidth / 2, rowY + rowHeight / 2);
+                    x += actWidth;
+                });
+            });
 
-            y += tableHeightB;
-            ctx.fillStyle = "#33393B";
-            ctx.fillRect(padding, y, tableWidth, infoHeight);
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
-            ctx.fillText("Legends", padding + tableWidth / 2, y + 20);
-            ctx.fillStyle = "#B0BEC5";
-            ctx.font = "14px Poppins";
-            ctx.fillText("Attendance: ✅ Present  ☑️ Valid Excuse  ❌ Absent  ❔ No Data", padding + tableWidth / 2, y + 45);
-            ctx.fillText("Activities: ✅ Completed  ❌ No Activity  ⏰ Late  ❔ No Data", padding + tableWidth / 2, y + 70);
-
-            y += infoHeight;
+            const footerY = y + activitiesHeight + padding;
             ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(padding, y, tableWidth, footerHeight);
+            ctx.fillRect(padding, footerY, tableWidth, footerHeight);
             ctx.fillStyle = "#FFD700";
             ctx.font = "italic 12px Poppins";
+            ctx.textAlign = "center";
             const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
-            ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, y + footerHeight / 2);
+            ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, footerY + footerHeight / 2);
 
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
@@ -714,7 +724,7 @@
             }, "image/png");
         }
 
-        // Initial load
+        // Initial Load
         loadWeeks();
     </script>
 </body>
