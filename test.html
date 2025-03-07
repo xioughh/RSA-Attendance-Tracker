@@ -3,26 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Tracker - Redstorm Modeling Agency</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Code Display with Syntax Highlighting</title>
+    <!-- Prism CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        pre {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Attendance Tracker Code with Syntax Highlighting</h1>
+        <pre><code class="language-html"><![CDATA[
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker - Redstorm Modeling Agency</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #D32F2F;
+            --background-gradient: linear-gradient(135deg, #1C2526, #2E3537);
+            --text-color: #E0E0E0;
+            --button-gradient: linear-gradient(45deg, #D32F2F, #FF5252);
+            --button-hover-gradient: linear-gradient(45deg, #8B0000, #D32F2F);
+            --table-header-gradient: linear-gradient(45deg, #8B0000, #D32F2F);
+            --table-even-row: #3A4345;
+            --table-odd-row: #2E3537;
+        }
+
+        body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1C2526, #2E3537);
-            color: #E0E0E0;
+            background: var(--background-gradient);
+            color: var(--text-color);
             margin: 0;
             padding: 10px;
             overflow-x: hidden;
             animation: fadeInBody 1s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
+
         h1 {
             text-align: center;
-            color: #D32F2F;
+            color: var(--primary-color);
             font-weight: 700;
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
+
         .header {
             display: flex;
             justify-content: space-between;
@@ -30,9 +89,11 @@
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
+
         #clock-container {
             text-align: center;
         }
+
         #clock {
             font-size: 2.5em;
             font-weight: 600;
@@ -44,21 +105,26 @@
             min-width: 220px;
             display: inline-block;
         }
+
         #ph-time {
             font-size: 1em;
             color: #B0BEC5;
             margin-top: 5px;
         }
+
         .container {
             max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
             background: #2E3537;
             padding: 15px;
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
             animation: fadeInContainer 1s ease-in-out;
+            overflow-x: hidden;
         }
-        .input-section, .button-section, .summary {
+
+        .input-section, .button-section {
             margin: 20px 0;
             display: flex;
             flex-wrap: wrap;
@@ -66,11 +132,13 @@
             align-items: center;
             justify-content: center;
         }
+
         label {
             color: #B0BEC5;
             font-weight: 400;
             font-size: 1.1em;
         }
+
         input[type="date"], #newMemberName, select {
             padding: 10px;
             border: none;
@@ -83,18 +151,15 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
+
         input[type="date"]:focus, #newMemberName:focus, select:focus {
             outline: none;
-            box-shadow: 0 0 5px #D32F2F;
+            box-shadow: 0 0 5px var(--primary-color);
         }
-        #weekPeriodDisplay {
-            color: #B0BEC5;
-            font-size: 1.1em;
-            margin-left: 10px;
-        }
+
         button {
             padding: 12px 24px;
-            background: linear-gradient(45deg, #D32F2F, #FF5252);
+            background: var(--button-gradient);
             color: #FFFFFF;
             border: none;
             border-radius: 8px;
@@ -106,77 +171,98 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
+
         button:hover {
-            background: linear-gradient(45deg, #8B0000, #D32F2F);
+            background: var(--button-hover-gradient);
             transform: scale(1.05);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            animation: pulse 1s infinite;
+            animation: pulse 0.8s infinite;
         }
+
         .action-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
             align-items: center;
             height: 40px;
+            width: 100%;
         }
+
         button.remove-btn {
             background: linear-gradient(45deg, #FF5252, #FF8A80);
             padding: 8px 16px;
             font-size: 0.9em;
             height: 36px;
+            min-width: 100px;
+            justify-content: center;
         }
+
         button.remove-btn:hover {
             background: linear-gradient(45deg, #D32F2F, #FF5252);
         }
+
         button.farewell-btn {
             padding: 8px 16px;
             font-size: 0.9em;
-            width: 130px;
             height: 36px;
+            min-width: 130px;
             justify-content: center;
+            box-sizing: border-box;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             background: #2E3537;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
             table-layout: fixed;
         }
+
         th, td {
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid #4A5557;
+            overflow: hidden;
         }
+
         th:nth-child(1) { width: 15%; }
         th:nth-child(2) { width: 10%; }
         th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6), th:nth-child(7), th:nth-child(8), th:nth-child(9) { width: 7%; }
-        th:nth-child(10) { width: 23%; }
+        th:nth-child(10) { width: 23%; min-width: 260px; }
+
         tr {
             height: 60px;
         }
+
         th {
-            background: linear-gradient(45deg, #8B0000, #D32F2F);
+            background: var(--table-header-gradient);
             color: #FFFFFF;
             font-weight: 700;
             text-transform: uppercase;
         }
+
         tr:nth-child(even) {
-            background-color: #3A4345;
+            background-color: var(--table-even-row);
         }
+
         tr:nth-child(odd) {
-            background-color: #2E3537;
+            background-color: var(--table-odd-row);
         }
+
         tr.new-row {
             animation: slideInBounce 0.5s ease-out forwards;
         }
+
         td {
-            color: #E0E0E0;
+            color: var(--text-color);
         }
+
         .farewell-row td {
             color: #757575;
         }
+
         td select {
             width: 60px;
             padding: 6px;
@@ -186,26 +272,38 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .legend, .summary {
+
+        .legend-summary {
             background: #2E3537;
             padding: 15px;
             border-radius: 10px;
             border: 2px solid #8B0000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .legend-section, .summary-section {
             flex: 1;
             min-width: 280px;
         }
-        .legend h3, .summary h3 {
-            color: #D32F2F;
+
+        .legend-section h3, .summary-section h3 {
+            color: var(--primary-color);
             margin-bottom: 10px;
             font-weight: 700;
             text-transform: uppercase;
         }
-        .legend p, .summary p {
+
+        .legend-section p, .summary-section p {
             margin: 8px 0;
             color: #B0BEC5;
             font-size: 1.1em;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -218,6 +316,7 @@
             align-items: center;
             z-index: 1000;
         }
+
         .modal-content {
             background: #2E3537;
             padding: 20px;
@@ -228,14 +327,17 @@
             width: 90%;
             animation: fadeInModal 0.3s ease-in-out;
         }
+
         .modal-content h3 {
-            color: #D32F2F;
+            color: var(--primary-color);
             margin-bottom: 15px;
         }
+
         .modal-content p {
-            color: #E0E0E0;
+            color: var(--text-color);
             margin-bottom: 20px;
         }
+
         .modal-content input {
             width: 100%;
             padding: 10px;
@@ -245,53 +347,84 @@
             background: #E0E0E0;
             color: #1C2526;
         }
-        .modal-content .button-group {
+
+        .modal-buttons {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-        .modal-content .button-group button {
-            width: 100%;
-            padding: 10px;
-            margin: 0;
             justify-content: center;
+            gap: 15px;
         }
-        .modal-content .button-group button.cancel {
-            background: linear-gradient(45deg, #757575, #B0BEC5);
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            min-width: 100px;
         }
-        .modal-content .button-group button.cancel:hover {
-            background: linear-gradient(45deg, #4A5557, #757575);
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
         }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @keyframes fadeInModal {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
         }
+
         @keyframes fadeInBody {
             from { opacity: 0; background: #1C2526; }
             to { opacity: 1; }
         }
+
         @keyframes fadeInContainer {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         @keyframes slideInBounce {
             from { transform: translateX(-30px); opacity: 0; }
             80% { transform: translateX(10px); opacity: 1; }
             to { transform: translateX(0); opacity: 1; }
         }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.03); }
             100% { transform: scale(1); }
         }
+
         @media (max-width: 768px) {
             body {
                 padding: 5px;
+                overflow-x: hidden;
             }
             .container {
                 padding: 10px;
                 margin: 0 5px;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
             }
             .header {
                 flex-direction: column;
@@ -334,18 +467,26 @@
                 font-size: 1em;
                 justify-content: center;
             }
-            .legend, .summary {
-                min-width: 100%;
+            button:hover {
+                animation: none;
+                transform: none;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+            .legend-summary {
+                flex-direction: column;
                 padding: 10px;
                 margin: 10px 0;
             }
+            .legend-section, .summary-section {
+                min-width: 100%;
+            }
             table {
-                font-size: 14px;
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
-                width: 100%;
-                box-sizing: border-box;
+                max-width: 100%;
+                font-size: 14px;
+                table-layout: fixed;
             }
             td select {
                 width: 50px;
@@ -356,15 +497,25 @@
                 height: auto;
                 align-items: stretch;
                 padding: 5px 0;
+                width: 100%;
             }
-            button.remove-btn, button.farewell-btn {
+            button.remove-btn {
+                width: 100%;
+                height: 40px;
+                padding: 8px 16px;
+                font-size: 0.9em;
+                min-width: unset;
+            }
+            button.farewell-btn {
                 width: 100%;
                 margin: 0;
                 height: 40px;
                 font-size: 0.9em;
+                min-width: unset;
             }
-            th:last-child, td:last-child {
-                min-width: 120px;
+            th:nth-child(10), td:nth-child(10) {
+                min-width: 160px;
+                width: 160px;
             }
             tr {
                 height: auto;
@@ -372,6 +523,18 @@
             }
             th, td {
                 padding: 10px;
+                overflow: hidden;
+            }
+            .modal-content {
+                padding: 15px;
+            }
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .modal-buttons button {
+                width: 100%;
+                max-width: 200px;
             }
         }
     </style>
@@ -387,18 +550,18 @@
         </div>
         <div class="input-section">
             <label for="weekStart">Week Start:</label>
-            <input type="date" id="weekStart">
+            <input type="date" id="weekStart" aria-label="Select week start date">
             <span id="weekPeriodDisplay"></span>
         </div>
         <div class="input-section">
             <label for="newMemberName">New Member Name:</label>
-            <input type="text" id="newMemberName" placeholder="Enter name">
+            <input type="text" id="newMemberName" placeholder="Enter name" aria-label="Enter new member name">
             <label for="newMemberTag">Tag:</label>
-            <select id="newMemberTag">
+            <select id="newMemberTag" aria-label="Select member tag">
                 <option value="Model">Model</option>
                 <option value="Officer">Officer</option>
             </select>
-            <button onclick="addMember()"><i class="fas fa-user-plus"></i> Add Member</button>
+            <button onclick="addMember()" aria-label="Add member"><i class="fas fa-user-plus"></i> Add Member</button>
         </div>
         <table id="attendanceTable">
             <thead>
@@ -417,27 +580,29 @@
             </thead>
             <tbody id="membersBody"></tbody>
         </table>
-        <div class="legend">
-            <h3>Legend:</h3>
-            <p>✅ = Present</p>
-            <p>☑️ = Valid Excuse</p>
-            <p>❌ = Absent</p>
-            <p>❔ = No Data</p>
-        </div>
-        <div class="summary">
-            <h3>Summary</h3>
-            <p><i class="fas fa-users"></i> Total Members: <span id="totalMembers">0</span></p>
-            <p><i class="fas fa-user-tie"></i> Total Officers: <span id="totalOfficers">0</span></p>
-            <p><i class="fas fa-user"></i> Total Models: <span id="totalModels">0</span></p>
+        <div class="legend-summary">
+            <div class="legend-section">
+                <h3>Legend:</h3>
+                <p>✅ = Present</p>
+                <p>☑️ = Valid Excuse</p>
+                <p>❌ = Absent</p>
+                <p>❔ = No Data</p>
+            </div>
+            <div class="summary-section">
+                <h3>Summary</h3>
+                <p><i class="fas fa-users"></i> Total Members: <span id="totalMembers">0</span></p>
+                <p><i class="fas fa-user-tie"></i> Total Officers: <span id="totalOfficers">0</span></p>
+                <p><i class="fas fa-user"></i> Total Models: <span id="totalModels">0</span></p>
+            </div>
         </div>
         <div class="button-section">
-            <button onclick="saveData()"><i class="fas fa-download"></i> Save Local</button>
-            <input type="file" id="loadFile" style="display: none;" onchange="loadData(event)">
-            <button onclick="document.getElementById('loadFile').click()"><i class="fas fa-upload"></i> Load Local</button>
-            <button onclick="loadLatestData()"><i class="fas fa-cloud-download-alt"></i> Load Latest</button>
-            <button onclick="saveLatestData()"><i class="fas fa-cloud-upload-alt"></i> Save Latest</button>
-            <button onclick="newWeekPrompt()"><i class="fas fa-calendar-plus"></i> New Week</button>
-            <button onclick="outputAsPNG()"><i class="fas fa-image"></i> Output PNG</button>
+            <button id="saveLocalBtn" onclick="saveData()" aria-label="Save data locally"><i class="fas fa-download"></i> Save Local</button>
+            <input type="file" id="loadFile" style="display: none;" onchange="loadData(event)" aria-label="Load data from file">
+            <button id="loadLocalBtn" onclick="document.getElementById('loadFile').click()" aria-label="Load data from file"><i class="fas fa-upload"></i> Load Local</button>
+            <button id="loadLatestBtn" onclick="loadLatestData()" aria-label="Load latest data from Firebase"><i class="fas fa-cloud-download-alt"></i> Load Latest</button>
+            <button onclick="saveLatestData()" aria-label="Save data to Firebase"><i class="fas fa-cloud-upload-alt"></i> Save Latest</button>
+            <button onclick="newWeekPrompt()" aria-label="Start a new week"><i class="fas fa-calendar-plus"></i> New Week</button>
+            <button onclick="outputAsPNG()" ontouchend="outputAsPNG()" aria-label="Export table as PNG"><i class="fas fa-image"></i> Output PNG</button>
         </div>
     </div>
 
@@ -446,7 +611,7 @@
         <div class="modal-content">
             <h3 id="alertTitle"></h3>
             <p id="alertMessage"></p>
-            <div class="button-group">
+            <div class="modal-buttons">
                 <button onclick="closeModal('alertModal')">OK</button>
             </div>
         </div>
@@ -455,35 +620,45 @@
         <div class="modal-content">
             <h3>New Week</h3>
             <p>Select the new week start date:</p>
-            <input type="date" id="newWeekStart">
+            <input type="date" id="newWeekStart" aria-label="Select new week start date">
             <span id="newWeekPeriodDisplay"></span>
-            <div class="button-group">
+            <div class="modal-buttons">
                 <button onclick="confirmNewWeek()">OK</button>
-                <button class="cancel" onclick="closeModal('newWeekModal')">Cancel</button>
+                <button onclick="closeModal('newWeekModal')">Cancel</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Obfuscated token parts (Base64-encoded) for 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
-        const tokenPart1 = "Z2hwX01rOGRaUzhF";              // ghp_Mk8dZS8E
-        const tokenPart2 = "bEplWFVIWFRlVlFRTlJJUg==";  // lJeXUHXTeVQQNRIR
-        const tokenPart3 = "UklMdUJmMlZqN2FS";          // RILuBf2Vj7aR
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
 
-        // Reassemble token at runtime
-        const GITHUB_TOKEN = atob(tokenPart1) + atob(tokenPart2) + atob(tokenPart3);
-        const GITHUB_USERNAME = "xioughh";
-        const GITHUB_REPO = "RSA-Attendance-Tracker";
-        const GITHUB_FILE_PATH = "attendance.json";
-        const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+    <!-- Firebase Compatibility SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlWS8HxSJp1Dwl_aMaDvoWvYu3CDZdgWM",
+            authDomain: "rsa-attendance-tracker.firebaseapp.com",
+            projectId: "rsa-attendance-tracker",
+            storageBucket: "rsa-attendance-tracker.appspot.com",
+            messagingSenderId: "912723437410",
+            appId: "1:912723437410:web:1c50e842f080adbfd12e3b"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
 
         let weekPeriod = "";
         let members = [];
 
-        const weekStartInput = document.getElementById("weekStart");
-        weekStartInput.onchange = updateWeekPeriod;
-
-        // Philippine Time (UTC+8) in 12-hour format
+        // Clock
         function updateClock() {
             const now = new Date();
             const phTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
@@ -504,21 +679,19 @@
             document.getElementById(modalId).style.display = "none";
         }
 
-        // Helper function to encode Unicode strings for btoa
-        function b64EncodeUnicode(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-                return String.fromCharCode('0x' + p1);
-            }));
+        // Loading Overlay
+        function showLoading() {
+            document.getElementById("loadingOverlay").style.display = "flex";
         }
 
-        // Helper function to decode Unicode strings from atob
-        function b64DecodeUnicode(str) {
-            return decodeURIComponent(atob(str).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
+        function hideLoading() {
+            document.getElementById("loadingOverlay").style.display = "none";
         }
 
-        // Update Week Period from Date Input
+        // Week Period
+        const weekStartInput = document.getElementById("weekStart");
+        weekStartInput.onchange = updateWeekPeriod;
+
         function updateWeekPeriod() {
             const start = new Date(weekStartInput.value);
             if (!weekStartInput.value) return;
@@ -529,18 +702,15 @@
             document.getElementById("weekPeriodDisplay").textContent = weekPeriod;
         }
 
+        // Table Management
         function updateTable(isNewRow = false) {
             const tbody = document.getElementById("membersBody");
             const currentMembers = Array.from(tbody.children).map(row => row.querySelector("td").textContent);
             tbody.innerHTML = members.length === 0 ? "<tr><td colspan='10'>No members added yet.</td></tr>" : "";
             members.forEach((member, index) => {
                 const row = document.createElement("tr");
-                if (member.farewell) {
-                    row.classList.add("farewell-row");
-                }
-                if (isNewRow && !currentMembers.includes(member.name)) {
-                    row.classList.add("new-row");
-                }
+                if (member.farewell) row.classList.add("farewell-row");
+                if (isNewRow && !currentMembers.includes(member.name)) row.classList.add("new-row");
                 row.innerHTML = `
                     <td>${member.name}</td>
                     <td>${member.tag}</td>
@@ -556,31 +726,48 @@
                     `).join("")}
                     <td>
                         <div class="action-buttons">
-                            <button class="remove-btn" onclick="removeMember(${index})"><i class="fas fa-trash"></i> Remove</button>
-                            <button class="farewell-btn" onclick="toggleFarewell(${index})"><i class="fas fa-handshake-slash"></i> ${member.farewell ? "Undo Farewell" : "Farewell"}</button>
+                            <button class="remove-btn" onclick="removeMember(${index})" aria-label="Remove member"><i class="fas fa-trash"></i> Remove</button>
+                            <button class="farewell-btn" onclick="toggleFarewell(${index})" aria-label="Toggle farewell status"><i class="fas fa-handshake-slash"></i> ${member.farewell ? "Undo Farewell" : "Farewell"}</button>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
             updateSummary();
+            toggleLoadButtonsPulse();
+        }
+
+        function toggleLoadButtonsPulse() {
+            const loadLocalBtn = document.getElementById("loadLocalBtn");
+            const loadLatestBtn = document.getElementById("loadLatestBtn");
+            if (members.length === 0) {
+                loadLocalBtn.classList.add("pulse");
+                loadLatestBtn.classList.add("pulse");
+            } else {
+                loadLocalBtn.classList.remove("pulse");
+                loadLatestBtn.classList.remove("pulse");
+            }
         }
 
         function addMember() {
             const name = document.getElementById("newMemberName").value.trim();
             const tag = document.getElementById("newMemberTag").value;
-            if (name) {
-                members.push({
-                    name: name,
-                    tag: tag,
-                    attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
-                    farewell: false
-                });
-                updateTable(true);
-                document.getElementById("newMemberName").value = "";
-            } else {
-                showAlert("Error", "Please enter a member name.");
+            if (!name || !/^[a-zA-Z\s]+$/.test(name)) {
+                showAlert("Error", "Please enter a valid member name (letters and spaces only).");
+                return;
             }
+            if (members.some(member => member.name.toLowerCase() === name.toLowerCase())) {
+                showAlert("Error", "Member name already exists.");
+                return;
+            }
+            members.push({
+                name: name,
+                tag: tag,
+                attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                farewell: false
+            });
+            updateTable(true);
+            document.getElementById("newMemberName").value = "";
         }
 
         function removeMember(index) {
@@ -600,20 +787,18 @@
 
         function updateSummary() {
             const activeMembers = members.filter(member => !member.farewell);
-            const totalMembers = activeMembers.length;
-            const totalOfficers = activeMembers.filter(member => member.tag === "Officer").length;
-            const totalModels = activeMembers.filter(member => member.tag === "Model").length;
-            document.getElementById("totalMembers").textContent = totalMembers;
-            document.getElementById("totalOfficers").textContent = totalOfficers;
-            document.getElementById("totalModels").textContent = totalModels;
+            document.getElementById("totalMembers").textContent = activeMembers.length;
+            document.getElementById("totalOfficers").textContent = activeMembers.filter(m => m.tag === "Officer").length;
+            document.getElementById("totalModels").textContent = activeMembers.filter(m => m.tag === "Model").length;
         }
 
+        // Local Save/Load
         function saveData() {
             if (!weekPeriod) {
                 showAlert("Error", "Please select a week period before saving.");
                 return;
             }
-            const data = JSON.stringify({ week: weekPeriod, members: members });
+            const data = JSON.stringify({ week: weekPeriod, members: members, weekStart: weekStartInput.value });
             const blob = new Blob([data], { type: "text/plain" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -627,118 +812,101 @@
 
         function loadData(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
+            if (!file) return;
+
+            showLoading();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    weekPeriod = data.week || "";
+                    members = data.members || [];
+                    weekStartInput.value = data.weekStart || "";
+                    updateWeekPeriod();
+                    updateTable();
+                    showAlert("Success", "Data loaded from local file!");
+                } catch (err) {
+                    showAlert("Error", "Invalid file format.");
+                } finally {
+                    hideLoading();
+                    // Reset the file input value to ensure the onchange event is triggered again
+                    event.target.value = "";
+                }
+            };
+            reader.onerror = () => {
+                showAlert("Error", "Failed to read the file.");
+                hideLoading();
+                // Reset the file input value even if there's an error
+                event.target.value = "";
+            };
+            reader.readAsText(file);
+        }
+
+        // Firebase Save/Load
+        function loadLatestData() {
+            showLoading();
+            db.collection("attendance").doc("latest").get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
                         weekPeriod = data.week || "";
-                        members = data.members || [];
-                        const [start] = weekPeriod.split(" - ").map(date => {
-                            const [month, day] = date.split(" ");
-                            const year = new Date().getFullYear();
-                            return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
-                        });
-                        weekStartInput.value = start;
+                        members = data.members.map(member => ({
+                            name: member.name,
+                            tag: member.tag,
+                            attendance: member.attendance || ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
+                            farewell: member.farewell || false
+                        }));
+                        weekStartInput.value = data.weekStart || "";
                         updateWeekPeriod();
                         updateTable();
-                    } catch (err) {
-                        showAlert("Error", "Invalid file format.");
+                        showAlert("Success", "Latest data loaded from Firebase!");
+                    } else {
+                        showAlert("Info", "No data found in Firebase.");
                     }
-                };
-                reader.readAsText(file);
-            }
+                })
+                .catch(error => {
+                    console.error("Error loading data:", error);
+                    if (error.code === "permission-denied") {
+                        showAlert("Error", "Permission denied. Please check Firebase rules.");
+                    } else if (error.code === "network-error") {
+                        showAlert("Error", "Network error. Please check your connection.");
+                    } else {
+                        showAlert("Error", "Failed to load data: " + error.message);
+                    }
+                })
+                .finally(() => hideLoading());
         }
 
-        async function loadLatestData() {
-            try {
-                const response = await fetch(GITHUB_API_URL, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                        "Accept": "application/vnd.github.v3+json"
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
-                }
-                const data = await response.json();
-                const content = b64DecodeUnicode(data.content);
-                const parsedData = JSON.parse(content);
-                
-                weekPeriod = parsedData.week || "";
-                members = parsedData.members.map(member => ({
-                    name: member.name,
-                    tag: member.tag,
-                    attendance: member.attendance || ["❔", "❔", "❔", "❔", "❔", "❔", "❔"],
-                    farewell: member.farewell || false
-                }));
-                const [start] = weekPeriod.split(" - ").map(date => {
-                    const [month, day] = date.split(" ");
-                    const year = new Date().getFullYear();
-                    return new Date(`${month} ${day}, ${year}`).toISOString().split("T")[0];
-                });
-                weekStartInput.value = start;
-                updateWeekPeriod();
-                updateTable();
-                showAlert("Success", "Latest data loaded successfully!");
-            } catch (error) {
-                console.error("Error:", error);
-                showAlert("Error", "Error loading data: " + error.message);
-            }
-        }
-
-        async function saveLatestData() {
+        function saveLatestData() {
             if (!weekPeriod) {
                 showAlert("Error", "Please select a week period before saving.");
                 return;
             }
-            try {
-                const getResponse = await fetch(GITHUB_API_URL, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                        "Accept": "application/vnd.github.v3+json"
+            showLoading();
+            const data = { 
+                week: weekPeriod, 
+                members: members, 
+                weekStart: weekStartInput.value,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            db.collection("attendance").doc("latest").set(data)
+                .then(() => {
+                    showAlert("Success", "Data saved to Firebase successfully!");
+                })
+                .catch(error => {
+                    console.error("Error saving data:", error);
+                    if (error.code === "permission-denied") {
+                        showAlert("Error", "Permission denied. Please check Firebase rules.");
+                    } else if (error.code === "network-error") {
+                        showAlert("Error", "Network error. Please check your connection.");
+                    } else {
+                        showAlert("Error", "Failed to save data: " + error.message);
                     }
-                });
-                let sha = null;
-                if (getResponse.ok) {
-                    const fileData = await getResponse.json();
-                    sha = fileData.sha;
-                } else if (getResponse.status !== 404) {
-                    throw new Error(`Failed to fetch file SHA: ${getResponse.status}`);
-                }
-
-                const data = { week: weekPeriod, members: members };
-                const content = b64EncodeUnicode(JSON.stringify(data));
-                
-                const response = await fetch(GITHUB_API_URL, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-                        "Accept": "application/vnd.github.v3+json",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        message: `Update attendance data for ${weekPeriod}`,
-                        content: content,
-                        sha: sha
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`GitHub API error: ${response.status} - ${errorData.message}`);
-                }
-
-                console.log("Saved data:", data);
-                showAlert("Success", "Data saved successfully!");
-            } catch (error) {
-                console.error("Error:", error);
-                showAlert("Error", "Error saving data: " + error.message);
-            }
+                })
+                .finally(() => hideLoading());
         }
 
+        // New Week with History Saving
         function newWeekPrompt() {
             const newWeekStartInput = document.getElementById("newWeekStart");
             newWeekStartInput.value = "";
@@ -757,26 +925,67 @@
 
         function confirmNewWeek() {
             const newWeekStartInput = document.getElementById("newWeekStart");
-            const start = new Date(newWeekStartInput.value);
+            const newStart = new Date(newWeekStartInput.value);
             if (!newWeekStartInput.value) {
                 showAlert("Error", "Please select a new week start date.");
                 return;
             }
-            const end = new Date(start);
-            end.setDate(start.getDate() + 6);
+            if (!weekPeriod || !weekStartInput.value) {
+                setNewWeek(newStart, newWeekStartInput.value);
+                closeModal("newWeekModal");
+                showAlert("Success", "New week started: " + weekPeriod);
+                return;
+            }
+
+            showLoading();
+            const currentWeekStart = weekStartInput.value;
+            const attendanceData = {
+                week: weekPeriod,
+                members: members,
+                weekStart: currentWeekStart
+            };
+
+            db.collection("activities").doc("latest").get()
+                .then(doc => {
+                    const activitiesData = doc.exists ? doc.data() : { week: weekPeriod, models: [] };
+                    const historyData = {
+                        week: weekPeriod,
+                        weekStart: currentWeekStart,
+                        attendance: attendanceData,
+                        activities: activitiesData,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    return db.collection("history").doc(currentWeekStart).set(historyData);
+                })
+                .then(() => {
+                    setNewWeek(newStart, newWeekStartInput.value);
+                    hideLoading();
+                    closeModal("newWeekModal");
+                    showAlert("Success", `New week started: ${weekPeriod}. Previous week's data saved to history.`);
+                })
+                .catch(error => {
+                    console.error("Error saving history:", error);
+                    hideLoading();
+                    closeModal("newWeekModal");
+                    showAlert("Error", "Failed to save previous week's data: " + error.message);
+                });
+        }
+
+        function setNewWeek(newStart, newWeekStartValue) {
+            const end = new Date(newStart);
+            end.setDate(newStart.getDate() + 6);
             const options = { month: "short", day: "numeric" };
-            weekPeriod = `${start.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
-            weekStartInput.value = newWeekStartInput.value;
+            weekPeriod = `${newStart.toLocaleDateString("en-US", options)} - ${end.toLocaleDateString("en-US", options)}`;
+            weekStartInput.value = newWeekStartValue;
             updateWeekPeriod();
             members = members.filter(member => !member.farewell).map(member => ({
                 ...member,
                 attendance: ["❔", "❔", "❔", "❔", "❔", "❔", "❔"]
             }));
             updateTable();
-            closeModal("newWeekModal");
-            showAlert("Success", "New week started: " + weekPeriod + ". Farewelled members removed.");
         }
 
+        // Updated PNG Output
         function outputAsPNG() {
             if (!weekPeriod) {
                 showAlert("Error", "Please select a week period before outputting.");
@@ -786,109 +995,166 @@
                 showAlert("Error", "No members to output.");
                 return;
             }
-            const scale = 3;
+
+            showLoading();
+            const scale = 4;
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-            ctx.font = "16px Poppins";
 
-            const memberNames = ["Member", ...members.map(m => m.name)];
-            const maxMemberWidth = Math.max(...memberNames.map(name => ctx.measureText(name).width));
-            const nameWidth = Math.max(150, maxMemberWidth + 40);
-            const tagWidth = 100;
-            const cellWidth = 60;
+            const padding = 30;
+            const headerHeight = 80;
             const rowHeight = 50;
-            const headerHeight = 60;
-            const weekHeight = 40;
-            const tableHeight = headerHeight + (members.length + 1) * rowHeight;
-            const legendItems = ["✅ = Present", "☑️ = Valid Excuse", "❌ = Absent", "❔ = No Data (Upcoming)"];
-            const legendLineHeight = 25;
-            const legendHeight = 20 + (legendItems.length * legendLineHeight);
-            const totalHeight = weekHeight + tableHeight + legendHeight;
-            const totalWidth = nameWidth + tagWidth + 7 * cellWidth;
+            const nameWidth = Math.max(180, Math.max(...members.map(m => ctx.measureText(m.name).width)) + 20);
+            const tagWidth = 100;
+            const dayWidth = 70;
+            const tableWidth = nameWidth + tagWidth + 7 * dayWidth;
+            const tableHeight = rowHeight * (members.length + 1);
+            const infoHeight = 150;
+            const footerHeight = 40;
+            const totalWidth = tableWidth + 2 * padding;
+            const totalHeight = headerHeight + tableHeight + infoHeight + footerHeight + 2 * padding;
 
             canvas.width = totalWidth * scale;
             canvas.height = totalHeight * scale;
             ctx.scale(scale, scale);
 
-            ctx.fillStyle = "#2E3537";
+            const gradient = ctx.createLinearGradient(0, 0, totalWidth, totalHeight);
+            gradient.addColorStop(0, "#1C2526");
+            gradient.addColorStop(1, "#2E3537");
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-            ctx.fillStyle = "#E0E0E0";
+            ctx.fillStyle = "rgba(211, 47, 47, 0.95)";
+            ctx.fillRect(padding, padding, tableWidth, headerHeight);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "bold 28px Poppins";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText("Attendance Week: " + weekPeriod, totalWidth / 2, weekHeight / 2 + 10);
+            ctx.fillText(`Attendance: ${weekPeriod}`, totalWidth / 2, padding + headerHeight / 2);
+
+            ctx.fillStyle = "#2E3537";
+            ctx.fillRect(padding, padding + headerHeight, tableWidth, tableHeight);
+            ctx.strokeStyle = "#4A5557";
+            ctx.lineWidth = 1;
 
             const headers = ["Member", "Tag", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-            let x = 0;
-            const columnWidths = [nameWidth, tagWidth, ...Array(7).fill(cellWidth)];
+            const colWidths = [nameWidth, tagWidth, ...Array(7).fill(dayWidth)];
+            let x = padding;
             headers.forEach((header, i) => {
-                ctx.fillStyle = "#8B0000";
-                ctx.fillRect(x, weekHeight, columnWidths[i], headerHeight);
+                const headerGradient = ctx.createLinearGradient(x, padding + headerHeight, x + colWidths[i], padding + headerHeight + rowHeight);
+                headerGradient.addColorStop(0, "#8B0000");
+                headerGradient.addColorStop(1, "#D32F2F");
+                ctx.fillStyle = headerGradient;
+                ctx.fillRect(x, padding + headerHeight, colWidths[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
-                ctx.fillText(header, x + columnWidths[i] / 2, weekHeight + headerHeight / 2);
-                x += columnWidths[i];
+                ctx.font = "bold 14px Poppins";
+                ctx.fillText(header, x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2);
+                x += colWidths[i];
             });
 
-            ctx.strokeStyle = "#8B0000";
-            ctx.lineWidth = 1;
             for (let i = 0; i <= members.length + 1; i++) {
                 ctx.beginPath();
-                ctx.moveTo(0, weekHeight + headerHeight + i * rowHeight);
-                ctx.lineTo(totalWidth, weekHeight + headerHeight + i * rowHeight);
+                ctx.moveTo(padding, padding + headerHeight + i * rowHeight);
+                ctx.lineTo(padding + tableWidth, padding + headerHeight + i * rowHeight);
                 ctx.stroke();
             }
-            x = 0;
-            columnWidths.forEach(width => {
+            x = padding;
+            colWidths.forEach(width => {
                 ctx.beginPath();
-                ctx.moveTo(x, weekHeight + headerHeight);
-                ctx.lineTo(x, weekHeight + tableHeight);
+                ctx.moveTo(x, padding + headerHeight);
+                ctx.lineTo(x, padding + headerHeight + tableHeight);
                 ctx.stroke();
                 x += width;
             });
 
+            ctx.font = "14px Poppins";
             members.forEach((member, index) => {
-                const y = weekHeight + headerHeight + (index + 1) * rowHeight;
-                let colX = 0;
-                if (member.farewell) {
-                    ctx.fillStyle = "#757575";
-                    ctx.fillText(member.name, colX + nameWidth / 2, y + rowHeight / 4);
-                    ctx.fillStyle = "#D32F2F";
-                    ctx.fillText("(Farewell)", colX + nameWidth / 2, y + rowHeight / 2 + 10);
-                } else {
-                    ctx.fillStyle = "#E0E0E0";
-                    ctx.fillText(member.name, colX + nameWidth / 2, y + rowHeight / 2);
-                }
-                colX += nameWidth;
+                const y = padding + headerHeight + rowHeight + index * rowHeight;
+                x = padding;
                 ctx.fillStyle = member.farewell ? "#757575" : "#E0E0E0";
-                ctx.fillText(member.tag, colX + tagWidth / 2, y + rowHeight / 2);
-                colX += tagWidth;
+                ctx.fillText(member.name, x + nameWidth / 2, y + rowHeight / 2);
+                x += nameWidth;
+                ctx.fillText(member.tag, x + tagWidth / 2, y + rowHeight / 2);
+                x += tagWidth;
                 member.attendance.forEach(status => {
-                    ctx.fillText(status, colX + cellWidth / 2, y + rowHeight / 2);
-                    colX += cellWidth;
+                    ctx.fillText(status, x + dayWidth / 2, y + rowHeight / 2);
+                    x += dayWidth;
                 });
+                if (member.farewell) {
+                    ctx.fillStyle = "#D32F2F";
+                    ctx.font = "italic 12px Poppins";
+                    ctx.fillText("(Farewell)", padding + nameWidth / 2, y + rowHeight / 2 + 15);
+                    ctx.font = "14px Poppins";
+                }
             });
+
+            const infoY = padding + headerHeight + tableHeight + 20;
+            ctx.fillStyle = "#33393B";
+            ctx.fillRect(padding, infoY, tableWidth, infoHeight);
 
             ctx.textAlign = "left";
-            ctx.fillStyle = "#E0E0E0";
-            let legendY = weekHeight + tableHeight + 20;
-            legendItems.forEach(item => {
-                ctx.fillText(item, 10, legendY);
-                legendY += legendLineHeight;
+            const summaryX = padding + 20;
+            ctx.fillStyle = "#D32F2F";
+            ctx.font = "bold 18px Poppins";
+            ctx.fillText("Summary", summaryX, infoY + 20);
+            ctx.fillStyle = "#B0BEC5";
+            ctx.font = "14px Poppins";
+            const summaryItems = [
+                `Total Members: ${document.getElementById("totalMembers").textContent}`,
+                `Total Officers: ${document.getElementById("totalOfficers").textContent}`,
+                `Total Models: ${document.getElementById("totalModels").textContent}`
+            ];
+            summaryItems.forEach((item, i) => {
+                ctx.fillText(item, summaryX, infoY + 45 + i * 25);
             });
 
-            const dataURL = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.href = dataURL;
-            link.download = `Attendance_${weekPeriod}.png`;
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(() => {
-                document.body.removeChild(link);
-            }, 100);
+            const legendX = padding + tableWidth - 150;
+            const legendY = infoY + 20;
+            ctx.fillStyle = "#D32F2F";
+            ctx.font = "bold 18px Poppins";
+            ctx.fillText("Legend", legendX, legendY);
+            ctx.fillStyle = "#B0BEC5";
+            ctx.font = "14px Poppins";
+            const legendItems = ["✅  Present", "☑️  Valid Excuse", "❌  Absent", "❔  No Data"];
+            legendItems.forEach((item, i) => {
+                ctx.fillText(item, legendX, legendY + 25 + i * 25);
+            });
+
+            const footerY = infoY + infoHeight + 10;
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.fillRect(padding, footerY, tableWidth, footerHeight);
+            ctx.fillStyle = "#FFD700";
+            ctx.font = "italic 12px Poppins";
+            ctx.textAlign = "center";
+            const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+            ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, footerY + footerHeight / 2);
+
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `Attendance_${weekPeriod}_${weekStartInput.value}.png`;
+                document.body.appendChild(link);
+                setTimeout(() => {
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    hideLoading();
+                }, 100);
+            }, "image/png");
         }
 
+        // Initial Setup
         updateTable();
     </script>
+</body>
+</html>
+        ]]></code></pre>
+    </div>
+    <!-- Prism JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 </body>
 </html>
