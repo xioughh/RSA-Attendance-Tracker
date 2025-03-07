@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* [Style section unchanged from your original] */
+        /* [Style section unchanged from previous version] */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1C2526, #2E3537);
@@ -333,8 +333,9 @@
             <div class="legend-section">
                 <h3>Legend</h3>
                 <p>✅ = Completed</p>
-                <p>❌ = No Activity</p>
+                <p>☑️ = Valid Excuse</p>
                 <p>⏰ = Late</p>
+                <p>❌ = No Activity</p>
                 <p>❔ = No Data</p>
             </div>
             <div class="summary-section">
@@ -384,6 +385,7 @@
         let activeModels = [];
         let currentWeekStart = null;
         let weekPeriod = "";
+        let isInitialLoad = true;
 
         // Clock update
         function updateClock() {
@@ -454,10 +456,11 @@
                         return `
                             <td class="${isOverdueCell ? 'overdue' : ''}">
                                 <select onchange="updateActivityStatus(${index}, ${actIndex}, this.value)">
-                                    <option value="❔" ${status === "❔" ? "selected" : ""}>❔</option>
                                     <option value="✅" ${status === "✅" ? "selected" : ""}>✅</option>
-                                    <option value="❌" ${status === "❌" ? "selected" : ""}>❌</option>
+                                    <option value="☑️" ${status === "☑️" ? "selected" : ""}>☑️</option>
                                     <option value="⏰" ${status === "⏰" ? "selected" : ""}>⏰</option>
+                                    <option value="❌" ${status === "❌" ? "selected" : ""}>❌</option>
+                                    <option value="❔" ${status === "❔" ? "selected" : ""}>❔</option>
                                 </select>
                             </td>
                         `;
@@ -507,7 +510,7 @@
                 .then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
-                        updateWeekPeriod(data.weekStart, data.week); // Fetch week period from Attendance Tracker
+                        updateWeekPeriod(data.weekStart, data.week);
                         const existingActivities = {};
                         activeModels.forEach(model => {
                             existingActivities[model.name] = model.activities;
@@ -519,18 +522,26 @@
                                 activities: existingActivities[member.name] || ["❔", "❔", "❔"]
                             }));
                         updateTable();
-                        showAlert("Success", "Members and week period refreshed from Attendance Tracker!");
+                        if (isInitialLoad) {
+                            loadActivities();
+                        } else {
+                            showAlert("Success", "Members and week period refreshed from Attendance Tracker!");
+                            hideLoading();
+                        }
                     } else {
                         showAlert("Info", "No attendance data found.");
                         activeModels = [];
                         updateTable();
+                        hideLoading();
                     }
                 })
-                .catch(error => showAlert("Error", "Failed to refresh members: " + error.message))
-                .finally(() => hideLoading());
+                .catch(error => {
+                    showAlert("Error", "Failed to refresh members: " + error.message);
+                    hideLoading();
+                });
         }
 
-        // Save activities
+        // Save activities to Firebase
         function saveActivities() {
             if (!currentWeekStart) {
                 showAlert("Error", "Week start not set.");
@@ -539,12 +550,13 @@
             showLoading();
             const data = {
                 weekStart: currentWeekStart,
-                week: weekPeriod, // Save week period along with data
+                week: weekPeriod,
                 models: activeModels.map(model => ({
                     name: model.name,
                     activities: model.activities,
                     hasCompleteActivities: model.activities.every(status => status === "✅")
-                }))
+                })),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
             db.collection("activities").doc("latest").set(data)
                 .then(() => showAlert("Success", "Activities saved successfully!"))
@@ -552,7 +564,7 @@
                 .finally(() => hideLoading());
         }
 
-        // Load activities
+        // Load activities from Firebase
         function loadActivities() {
             showLoading();
             db.collection("activities").doc("latest").get()
@@ -563,19 +575,30 @@
                             activeModels.forEach(model => {
                                 const savedModel = data.models.find(m => m.name === model.name);
                                 if (savedModel) {
-                                    model.activities = savedModel.activities;
+                                    model.activities = savedModel.activities.map(status => 
+                                        ["✅", "☑️", "⏰", "❌", "❔"].includes(status) ? status : "❔"
+                                    );
                                 }
                             });
                             updateTable();
-                            showAlert("Success", "Activities loaded successfully!");
+                            if (isInitialLoad) {
+                                showAlert("Success", "Members and activities loaded successfully!");
+                                isInitialLoad = false;
+                            } else {
+                                showAlert("Success", "Activities loaded successfully!");
+                            }
                         } else {
                             showAlert("Info", "Loaded activities are from a different week. Starting fresh.");
                             activeModels.forEach(model => model.activities = ["❔", "❔", "❔"]);
                             updateTable();
                         }
+                    } else if (!isInitialLoad) {
+                        showAlert("Info", "No activities data found.");
                     }
                 })
-                .catch(error => showAlert("Error", "Failed to load activities: " + error.message))
+                .catch(error => {
+                    showAlert("Error", "Failed to load activities: " + error.message);
+                })
                 .finally(() => hideLoading());
         }
 
@@ -586,145 +609,158 @@
                 return;
             }
             showLoading();
-            const scale = 4; // Already matches Activities Tracker
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
+            try {
+                const scale = 4;
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
 
-            const padding = 30;
-            const headerHeight = 80;
-            const rowHeight = 50;
-            const nameWidth = Math.max(200, Math.max(...activeModels.map(m => ctx.measureText(m.name).width)) + 20);
-            const actWidth = 100;
-            const tableWidth = nameWidth + 3 * actWidth;
-            const tableHeight = rowHeight * (activeModels.length + 1);
-            const infoHeight = 200;
-            const footerHeight = 40;
-            const totalWidth = tableWidth + 2 * padding;
-            const totalHeight = headerHeight + tableHeight + infoHeight + footerHeight + 2 * padding;
+                const padding = 30;
+                const headerHeight = 80;
+                const rowHeight = 50;
+                const nameWidth = Math.max(200, Math.max(...activeModels.map(m => ctx.measureText(m.name).width)) + 20);
+                const actWidth = 100;
+                const tableWidth = nameWidth + 3 * actWidth;
+                const tableHeight = rowHeight * (activeModels.length + 1);
+                const infoHeight = 200;
+                const footerHeight = 40;
+                const totalWidth = tableWidth + 2 * padding;
+                const totalHeight = headerHeight + tableHeight + infoHeight + footerHeight + 2 * padding;
 
-            canvas.width = totalWidth * scale;
-            canvas.height = totalHeight * scale;
-            ctx.scale(scale, scale);
+                canvas.width = totalWidth * scale;
+                canvas.height = totalHeight * scale;
+                ctx.scale(scale, scale);
 
-            const gradient = ctx.createLinearGradient(0, 0, totalWidth, totalHeight);
-            gradient.addColorStop(0, "#1C2526");
-            gradient.addColorStop(1, "#2E3537");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, totalWidth, totalHeight);
+                const gradient = ctx.createLinearGradient(0, 0, totalWidth, totalHeight);
+                gradient.addColorStop(0, "#1C2526");
+                gradient.addColorStop(1, "#2E3537");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-            ctx.fillStyle = "rgba(211, 47, 47, 0.95)";
-            ctx.fillRect(padding, padding, tableWidth, headerHeight);
-            ctx.fillStyle = "#FFFFFF";
-            ctx.font = "bold 28px Poppins";
-            ctx.textAlign = "center";
-            ctx.fillText(`Activities: ${weekPeriod}`, totalWidth / 2, padding + headerHeight / 2);
-
-            ctx.fillStyle = "#2E3537";
-            ctx.fillRect(padding, padding + headerHeight, tableWidth, tableHeight);
-            ctx.strokeStyle = "#4A5557";
-            ctx.lineWidth = 1;
-
-            const headers = ["Model", "Activity 1 (Mon)", "Activity 2 (Wed)", "Activity 3 (Fri)"];
-            const colWidths = [nameWidth, actWidth, actWidth, actWidth];
-            let x = padding;
-            headers.forEach((header, i) => {
-                const headerGradient = ctx.createLinearGradient(x, padding + headerHeight, x + colWidths[i], padding + headerHeight + rowHeight);
-                headerGradient.addColorStop(0, "#8B0000");
-                headerGradient.addColorStop(1, "#D32F2F");
-                ctx.fillStyle = headerGradient;
-                ctx.fillRect(x, padding + headerHeight, colWidths[i], rowHeight);
+                ctx.fillStyle = "rgba(211, 47, 47, 0.95)";
+                ctx.fillRect(padding, padding, tableWidth, headerHeight);
                 ctx.fillStyle = "#FFFFFF";
-                ctx.font = "bold 14px Poppins";
-                if (i === 0) {
-                    ctx.fillText(header.trim(), x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2);
-                } else {
-                    const lines = header.split(" ");
-                    ctx.fillText(lines[0], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 - 10);
-                    ctx.font = "12px Poppins";
-                    ctx.fillText(lines[1], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 + 10);
-                    ctx.font = "bold 14px Poppins"; // Reset font
-                }
-                x += colWidths[i];
-            });
+                ctx.font = "bold 28px Poppins";
+                ctx.textAlign = "center";
+                ctx.fillText(`Activities: ${weekPeriod}`, totalWidth / 2, padding + headerHeight / 2);
 
-            for (let i = 0; i <= activeModels.length + 1; i++) {
-                ctx.beginPath();
-                ctx.moveTo(padding, padding + headerHeight + i * rowHeight);
-                ctx.lineTo(padding + tableWidth, padding + headerHeight + i * rowHeight);
-                ctx.stroke();
-            }
-            x = padding;
-            colWidths.forEach(width => {
-                ctx.beginPath();
-                ctx.moveTo(x, padding + headerHeight);
-                ctx.lineTo(x, padding + headerHeight + tableHeight);
-                ctx.stroke();
-                x += width;
-            });
+                ctx.fillStyle = "#2E3537";
+                ctx.fillRect(padding, padding + headerHeight, tableWidth, tableHeight);
+                ctx.strokeStyle = "#4A5557";
+                ctx.lineWidth = 1;
 
-            ctx.font = "14px Poppins";
-            activeModels.forEach((model, index) => {
-                const y = padding + headerHeight + rowHeight + index * rowHeight;
-                x = padding;
-                ctx.fillStyle = "#E0E0E0";
-                ctx.fillText(model.name, x + nameWidth / 2, y + rowHeight / 2);
-                x += nameWidth;
-                model.activities.forEach(status => {
-                    ctx.fillText(status, x + actWidth / 2, y + rowHeight / 2);
-                    x += actWidth;
+                const headers = ["Model", "Activity 1 (Mon)", "Activity 2 (Wed)", "Activity 3 (Fri)"];
+                const colWidths = [nameWidth, actWidth, actWidth, actWidth];
+                let x = padding;
+                headers.forEach((header, i) => {
+                    const headerGradient = ctx.createLinearGradient(x, padding + headerHeight, x + colWidths[i], padding + headerHeight + rowHeight);
+                    headerGradient.addColorStop(0, "#8B0000");
+                    headerGradient.addColorStop(1, "#D32F2F");
+                    ctx.fillStyle = headerGradient;
+                    ctx.fillRect(x, padding + headerHeight, colWidths[i], rowHeight);
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = "bold 14px Poppins";
+                    if (i === 0) {
+                        ctx.fillText(header.trim(), x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2);
+                    } else {
+                        const lines = header.split(" ");
+                        ctx.fillText(lines[0], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 - 10);
+                        ctx.font = "12px Poppins";
+                        ctx.fillText(lines[1], x + colWidths[i] / 2, padding + headerHeight + rowHeight / 2 + 10);
+                        ctx.font = "bold 14px Poppins";
+                    }
+                    x += colWidths[i];
                 });
-            });
 
-            const infoY = padding + headerHeight + tableHeight + 20;
-            ctx.fillStyle = "#33393B";
-            ctx.fillRect(padding, infoY, tableWidth, infoHeight);
+                for (let i = 0; i <= activeModels.length + 1; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(padding, padding + headerHeight + i * rowHeight);
+                    ctx.lineTo(padding + tableWidth, padding + headerHeight + i * rowHeight);
+                    ctx.stroke();
+                }
+                x = padding;
+                colWidths.forEach(width => {
+                    ctx.beginPath();
+                    ctx.moveTo(x, padding + headerHeight);
+                    ctx.lineTo(x, padding + headerHeight + tableHeight);
+                    ctx.stroke();
+                    x += width;
+                });
 
-            ctx.textAlign = "left";
-            const summaryX = padding + 20;
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
-            ctx.fillText("Summary", summaryX, infoY + 20);
-            ctx.fillStyle = "#B0BEC5";
-            ctx.font = "14px Poppins";
-            ctx.fillText(`Models with Complete Activities: ${document.getElementById("completeCount").textContent}`, summaryX, infoY + 50);
-            const namesText = `Names: ${document.getElementById("completeNames").textContent}`;
-            wrapText(ctx, namesText, tableWidth / 2 - 40, summaryX, infoY + 75, 20);
+                ctx.font = "14px Poppins";
+                activeModels.forEach((model, index) => {
+                    const y = padding + headerHeight + rowHeight + index * rowHeight;
+                    x = padding;
+                    ctx.fillStyle = "#E0E0E0";
+                    ctx.fillText(model.name, x + nameWidth / 2, y + rowHeight / 2);
+                    x += nameWidth;
+                    model.activities.forEach(status => {
+                        ctx.fillText(status, x + actWidth / 2, y + rowHeight / 2);
+                        x += actWidth;
+                    });
+                });
 
-            const legendX = padding + tableWidth - 150;
-            const legendY = infoY + 20;
-            ctx.fillStyle = "#D32F2F";
-            ctx.font = "bold 18px Poppins";
-            ctx.fillText("Legend", legendX, legendY);
-            ctx.fillStyle = "#B0BEC5";
-            ctx.font = "14px Poppins";
-            const legendItems = ["✅  Completed", "❌  No Activity", "⏰  Late", "❔  No Data"];
-            legendItems.forEach((item, i) => {
-                ctx.fillText(item, legendX, legendY + 25 + i * 20);
-            });
+                const infoY = padding + headerHeight + tableHeight + 20;
+                ctx.fillStyle = "#33393B";
+                ctx.fillRect(padding, infoY, tableWidth, infoHeight);
 
-            const footerY = infoY + infoHeight + 10;
-            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-            ctx.fillRect(padding, footerY, tableWidth, footerHeight);
-            ctx.fillStyle = "#FFD700";
-            ctx.font = "italic 12px Poppins";
-            ctx.textAlign = "center";
-            const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
-            ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, footerY + footerHeight / 2);
+                ctx.textAlign = "left";
+                const summaryX = padding + 20;
+                ctx.fillStyle = "#D32F2F";
+                ctx.font = "bold 18px Poppins";
+                ctx.fillText("Summary", summaryX, infoY + 20);
+                ctx.fillStyle = "#B0BEC5";
+                ctx.font = "14px Poppins";
+                ctx.fillText(`Models with Complete Activities: ${document.getElementById("completeCount").textContent}`, summaryX, infoY + 50);
+                const namesText = `Names: ${document.getElementById("completeNames").textContent}`;
+                wrapText(ctx, namesText, tableWidth / 2 - 40, summaryX, infoY + 75, 20);
 
-            // Download with Blob
-            canvas.toBlob(blob => {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `Activities_${weekPeriod}_${currentWeekStart}.png`;
-                document.body.appendChild(link);
-                setTimeout(() => {
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                    hideLoading();
-                }, 100);
-            }, "image/png");
+                const legendX = padding + tableWidth - 150;
+                const legendY = infoY + 20;
+                ctx.fillStyle = "#D32F2F";
+                ctx.font = "bold 18px Poppins";
+                ctx.fillText("Legend", legendX, legendY);
+                ctx.fillStyle = "#B0BEC5";
+                ctx.font = "14px Poppins";
+                const legendItems = [
+                    "✅  Completed",
+                    "☑️  Valid Excuse",
+                    "⏰  Late",
+                    "❌  No Activity",
+                    "❔  No Data"
+                ];
+                legendItems.forEach((item, i) => {
+                    ctx.fillText(item, legendX, legendY + 25 + i * 20);
+                });
+
+                const footerY = infoY + infoHeight + 10;
+                ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+                ctx.fillRect(padding, footerY, tableWidth, footerHeight);
+                ctx.fillStyle = "#FFD700";
+                ctx.font = "italic 12px Poppins";
+                ctx.textAlign = "center";
+                const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+                ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, footerY + footerHeight / 2);
+
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `Activities_${weekPeriod}_${currentWeekStart}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        hideLoading();
+                    } else {
+                        throw new Error("Failed to generate PNG blob.");
+                    }
+                }, "image/png");
+            } catch (error) {
+                console.error("PNG Output Error:", error);
+                showAlert("Error", "Failed to generate PNG: " + error.message);
+                hideLoading();
+            }
         }
 
         // Wrap text for summary names
