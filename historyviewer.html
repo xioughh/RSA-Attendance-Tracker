@@ -412,7 +412,7 @@
             document.getElementById("alertModal").style.display = "flex";
         }
         function closeModal(modalId) {
-            document.getElementById("modalId").style.display = "none";
+            document.getElementById(modalId).style.display = "none";
         }
 
         // Loading Overlay
@@ -516,7 +516,7 @@
                 return;
             }
             showLoading();
-            const scale = 3;
+            const scale = 4;
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
@@ -571,7 +571,10 @@
             const colWidthsA = [nameWidthA, tagWidth, dayWidth, dayWidth, dayWidth, dayWidth, dayWidth, dayWidth, dayWidth];
             let x = padding;
             headersA.forEach((header, i) => {
-                ctx.fillStyle = "rgba(139, 0, 0, 0.9)";
+                const headerGradient = ctx.createLinearGradient(x, y, x + colWidthsA[i], y + rowHeight);
+                headerGradient.addColorStop(0, "#8B0000");
+                headerGradient.addColorStop(1, "#D32F2F");
+                ctx.fillStyle = headerGradient;
                 ctx.fillRect(x, y, colWidthsA[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font = "bold 14px Poppins";
@@ -608,6 +611,12 @@
                         ctx.fillText(status, x + dayWidth / 2, rowY + rowHeight / 2);
                         x += dayWidth;
                     });
+                    if (member.farewell) {
+                        ctx.fillStyle = "#D32F2F";
+                        ctx.font = "italic 12px Poppins";
+                        ctx.fillText("(Farewell)", padding + nameWidthA / 2, rowY + rowHeight / 2 + 15);
+                        ctx.font = "14px Poppins"; // Reset font
+                    }
                 });
             } else {
                 ctx.fillStyle = "#E0E0E0";
@@ -621,12 +630,16 @@
             y += titleHeight;
 
             ctx.fillStyle = "#2E3537";
-            ctx.fillRect(padding, y, tableWidth, tableHeightB);
+            const activitiesX = padding + (tableWidth - tableWidthB) / 2; // Center the Activities table
+            ctx.fillRect(activitiesX, y, tableWidthB, tableHeightB);
             const headersB = ["Model", "ACT1", "ACT2", "ACT3"];
             const colWidthsB = [nameWidthB, actWidth, actWidth, actWidth];
-            x = padding;
+            x = activitiesX;
             headersB.forEach((header, i) => {
-                ctx.fillStyle = "rgba(139, 0, 0, 0.9)";
+                const headerGradient = ctx.createLinearGradient(x, y, x + colWidthsB[i], y + rowHeight);
+                headerGradient.addColorStop(0, "#8B0000");
+                headerGradient.addColorStop(1, "#D32F2F");
+                ctx.fillStyle = headerGradient;
                 ctx.fillRect(x, y, colWidthsB[i], rowHeight);
                 ctx.fillStyle = "#FFFFFF";
                 ctx.font = "bold 14px Poppins";
@@ -636,11 +649,11 @@
 
             for (let i = 0; i <= (selectedWeek.activities?.models?.length || 1); i++) {
                 ctx.beginPath();
-                ctx.moveTo(padding, y + i * rowHeight);
-                ctx.lineTo(padding + tableWidth, y + i * rowHeight);
+                ctx.moveTo(activitiesX, y + i * rowHeight);
+                ctx.lineTo(activitiesX + tableWidthB, y + i * rowHeight);
                 ctx.stroke();
             }
-            x = padding;
+            x = activitiesX;
             colWidthsB.forEach(width => {
                 ctx.beginPath();
                 ctx.moveTo(x, y);
@@ -653,18 +666,18 @@
             if (selectedWeek.activities?.models?.length) {
                 selectedWeek.activities.models.forEach((model, index) => {
                     const rowY = y + rowHeight + index * rowHeight;
-                    x = padding;
+                    x = activitiesX;
                     ctx.fillStyle = "#E0E0E0";
                     ctx.fillText(model.name, x + nameWidthB / 2, rowY + rowHeight / 2);
                     x += nameWidthB;
                     model.activities.forEach(status => {
                         ctx.fillText(status, x + actWidth / 2, rowY + rowHeight / 2);
-                        x += actWidth; // Fixed typo: was 'width'
+                        x += actWidth;
                     });
                 });
             } else {
                 ctx.fillStyle = "#E0E0E0";
-                ctx.fillText("No Activities Data Available", totalWidth / 2, y + rowHeight * 1.5);
+                ctx.fillText("No Activities Data Available", activitiesX + tableWidthB / 2, y + rowHeight * 1.5);
             }
 
             y += tableHeightB;
@@ -697,7 +710,7 @@
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                     hideLoading();
-                }, 100); // Slight delay for mobile compatibility
+                }, 100);
             }, "image/png");
         }
 
