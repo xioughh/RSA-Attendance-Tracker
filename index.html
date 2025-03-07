@@ -113,20 +113,24 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
             animation: pulse 0.8s infinite;
         }
+        button.pulse {
+            animation: pulse 0.8s infinite;
+        }
         .action-buttons {
             display: flex;
             gap: 10px;
             justify-content: center;
             align-items: center;
             height: 40px;
-            width: 100%; /* Ensure consistent width */
+            width: 100%;
         }
         button.remove-btn {
             background: linear-gradient(45deg, #FF5252, #FF8A80);
-            padding: 8px 16px;
+            padding: 8px 16px; /* Adjusted padding */
             font-size: 0.9em;
             height: 36px;
-            min-width: 90px; /* Fixed minimum width */
+            min-width: 100px; /* Ensure enough space for text and icon */
+            justify-content: center;
         }
         button.remove-btn:hover {
             background: linear-gradient(45deg, #D32F2F, #FF5252);
@@ -135,7 +139,7 @@
             padding: 8px 16px;
             font-size: 0.9em;
             height: 36px;
-            min-width: 130px; /* Fixed width to match longest text */
+            min-width: 130px;
             justify-content: center;
             box-sizing: border-box;
         }
@@ -146,18 +150,18 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            table-layout: fixed; /* Lock column widths */
+            table-layout: fixed;
         }
         th, td {
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid #4A5557;
-            overflow: hidden; /* Prevent content from expanding cells */
+            overflow: hidden;
         }
         th:nth-child(1) { width: 15%; }
         th:nth-child(2) { width: 10%; }
         th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6), th:nth-child(7), th:nth-child(8), th:nth-child(9) { width: 7%; }
-        th:nth-child(10) { width: 23%; min-width: 250px; } /* Fixed min-width for Action column */
+        th:nth-child(10) { width: 23%; min-width: 260px; }
         tr {
             height: 60px;
         }
@@ -366,6 +370,12 @@
                 font-size: 1em;
                 justify-content: center;
             }
+            button:hover {
+                /* Disable hover effects on mobile to prevent pulsing on load */
+                animation: none;
+                transform: none;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
             .legend-summary {
                 flex-direction: column;
                 padding: 10px;
@@ -380,7 +390,7 @@
                 white-space: nowrap;
                 max-width: 100%;
                 font-size: 14px;
-                table-layout: fixed; /* Lock column widths on mobile too */
+                table-layout: fixed;
             }
             td select {
                 width: 50px;
@@ -391,18 +401,25 @@
                 height: auto;
                 align-items: stretch;
                 padding: 5px 0;
-                width: 100%; /* Consistent width */
+                width: 100%;
             }
-            button.remove-btn, button.farewell-btn {
+            button.remove-btn {
+                width: 100%;
+                height: 40px;
+                padding: 8px 16px;
+                font-size: 0.9em;
+                min-width: unset;
+            }
+            button.farewell-btn {
                 width: 100%;
                 margin: 0;
                 height: 40px;
                 font-size: 0.9em;
-                min-width: unset; /* Remove min-width here, rely on th/td */
+                min-width: unset;
             }
             th:nth-child(10), td:nth-child(10) {
-                min-width: 150px; /* Fixed width for Action column on mobile */
-                width: 150px;
+                min-width: 160px;
+                width: 160px;
             }
             tr {
                 height: auto;
@@ -410,7 +427,7 @@
             }
             th, td {
                 padding: 10px;
-                overflow: hidden; /* Prevent content from expanding cells */
+                overflow: hidden;
             }
             .modal-content {
                 padding: 15px;
@@ -483,10 +500,10 @@
             </div>
         </div>
         <div class="button-section">
-            <button onclick="saveData()"><i class="fas fa-download"></i> Save Local</button>
+            <button id="saveLocalBtn" onclick="saveData()"><i class="fas fa-download"></i> Save Local</button>
             <input type="file" id="loadFile" style="display: none;" onchange="loadData(event)">
-            <button onclick="document.getElementById('loadFile').click()"><i class="fas fa-upload"></i> Load Local</button>
-            <button onclick="loadLatestData()"><i class="fas fa-cloud-download-alt"></i> Load Latest</button>
+            <button id="loadLocalBtn" onclick="document.getElementById('loadFile').click()"><i class="fas fa-upload"></i> Load Local</button>
+            <button id="loadLatestBtn" onclick="loadLatestData()"><i class="fas fa-cloud-download-alt"></i> Load Latest</button>
             <button onclick="saveLatestData()"><i class="fas fa-cloud-upload-alt"></i> Save Latest</button>
             <button onclick="newWeekPrompt()"><i class="fas fa-calendar-plus"></i> New Week</button>
             <button onclick="outputAsPNG()" ontouchend="outputAsPNG()"><i class="fas fa-image"></i> Output PNG</button>
@@ -619,6 +636,19 @@
                 tbody.appendChild(row);
             });
             updateSummary();
+            toggleLoadButtonsPulse();
+        }
+
+        function toggleLoadButtonsPulse() {
+            const loadLocalBtn = document.getElementById("loadLocalBtn");
+            const loadLatestBtn = document.getElementById("loadLatestBtn");
+            if (members.length === 0) {
+                loadLocalBtn.classList.add("pulse");
+                loadLatestBtn.classList.add("pulse");
+            } else {
+                loadLocalBtn.classList.remove("pulse");
+                loadLatestBtn.classList.remove("pulse");
+            }
         }
 
         function addMember() {
@@ -1005,9 +1035,7 @@
                 setTimeout(() => {
                     link.click();
                     document.body.removeChild(link);
-                    URL.revokeObjectURL
-
-(url);
+                    URL.revokeObjectURL(url);
                     hideLoading();
                 }, 100);
             }, "image/png");
