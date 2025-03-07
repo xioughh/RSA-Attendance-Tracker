@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* [Style section unchanged from your original] */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1C2526, #2E3537);
@@ -58,6 +57,7 @@
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
             animation: fadeInContainer 1s ease-in-out;
+            overflow-x: hidden;
         }
         .input-section, .button-section {
             margin: 20px 0;
@@ -119,12 +119,14 @@
             justify-content: center;
             align-items: center;
             height: 40px;
+            width: 100%; /* Ensure consistent width */
         }
         button.remove-btn {
             background: linear-gradient(45deg, #FF5252, #FF8A80);
             padding: 8px 16px;
             font-size: 0.9em;
             height: 36px;
+            min-width: 90px; /* Fixed minimum width */
         }
         button.remove-btn:hover {
             background: linear-gradient(45deg, #D32F2F, #FF5252);
@@ -132,9 +134,10 @@
         button.farewell-btn {
             padding: 8px 16px;
             font-size: 0.9em;
-            width: 130px;
             height: 36px;
+            min-width: 130px; /* Fixed width to match longest text */
             justify-content: center;
+            box-sizing: border-box;
         }
         table {
             width: 100%;
@@ -143,17 +146,18 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            table-layout: fixed;
+            table-layout: fixed; /* Lock column widths */
         }
         th, td {
             padding: 15px;
             text-align: center;
             border-bottom: 1px solid #4A5557;
+            overflow: hidden; /* Prevent content from expanding cells */
         }
         th:nth-child(1) { width: 15%; }
         th:nth-child(2) { width: 10%; }
         th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6), th:nth-child(7), th:nth-child(8), th:nth-child(9) { width: 7%; }
-        th:nth-child(10) { width: 23%; }
+        th:nth-child(10) { width: 23%; min-width: 250px; } /* Fixed min-width for Action column */
         tr {
             height: 60px;
         }
@@ -311,10 +315,15 @@
         @media (max-width: 768px) {
             body {
                 padding: 5px;
+                overflow-x: hidden;
             }
             .container {
                 padding: 10px;
                 margin: 0 5px;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
             }
             .header {
                 flex-direction: column;
@@ -366,12 +375,12 @@
                 min-width: 100%;
             }
             table {
-                font-size: 14px;
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
-                width: 100%;
-                box-sizing: border-box;
+                max-width: 100%;
+                font-size: 14px;
+                table-layout: fixed; /* Lock column widths on mobile too */
             }
             td select {
                 width: 50px;
@@ -382,15 +391,18 @@
                 height: auto;
                 align-items: stretch;
                 padding: 5px 0;
+                width: 100%; /* Consistent width */
             }
             button.remove-btn, button.farewell-btn {
                 width: 100%;
                 margin: 0;
                 height: 40px;
                 font-size: 0.9em;
+                min-width: unset; /* Remove min-width here, rely on th/td */
             }
-            th:last-child, td:last-child {
-                min-width: 120px;
+            th:nth-child(10), td:nth-child(10) {
+                min-width: 150px; /* Fixed width for Action column on mobile */
+                width: 150px;
             }
             tr {
                 height: auto;
@@ -398,6 +410,7 @@
             }
             th, td {
                 padding: 10px;
+                overflow: hidden; /* Prevent content from expanding cells */
             }
             .modal-content {
                 padding: 15px;
@@ -785,7 +798,6 @@
                 return;
             }
             if (!weekPeriod || !weekStartInput.value) {
-                // If no current week exists, just set the new week
                 setNewWeek(newStart, newWeekStartInput.value);
                 closeModal("newWeekModal");
                 showAlert("Success", "New week started: " + weekPeriod);
@@ -800,7 +812,6 @@
                 weekStart: currentWeekStart
             };
 
-            // Fetch current activities data
             db.collection("activities").doc("latest").get()
                 .then(doc => {
                     const activitiesData = doc.exists ? doc.data() : { week: weekPeriod, models: [] };
@@ -811,12 +822,9 @@
                         activities: activitiesData,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     };
-
-                    // Save to history collection
                     return db.collection("history").doc(currentWeekStart).set(historyData);
                 })
                 .then(() => {
-                    // Reset for new week
                     setNewWeek(newStart, newWeekStartInput.value);
                     hideLoading();
                     closeModal("newWeekModal");
@@ -856,11 +864,10 @@
             }
 
             showLoading();
-            const scale = 4; // Match Activities Tracker
+            const scale = 4;
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
-            // Dimensions
             const padding = 30;
             const headerHeight = 80;
             const rowHeight = 50;
@@ -869,7 +876,7 @@
             const dayWidth = 70;
             const tableWidth = nameWidth + tagWidth + 7 * dayWidth;
             const tableHeight = rowHeight * (members.length + 1);
-            const infoHeight = 150; // Summary + Legend
+            const infoHeight = 150;
             const footerHeight = 40;
             const totalWidth = tableWidth + 2 * padding;
             const totalHeight = headerHeight + tableHeight + infoHeight + footerHeight + 2 * padding;
@@ -878,14 +885,12 @@
             canvas.height = totalHeight * scale;
             ctx.scale(scale, scale);
 
-            // Background with Gradient
             const gradient = ctx.createLinearGradient(0, 0, totalWidth, totalHeight);
             gradient.addColorStop(0, "#1C2526");
             gradient.addColorStop(1, "#2E3537");
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-            // Header
             ctx.fillStyle = "rgba(211, 47, 47, 0.95)";
             ctx.fillRect(padding, padding, tableWidth, headerHeight);
             ctx.fillStyle = "#FFFFFF";
@@ -894,13 +899,11 @@
             ctx.textBaseline = "middle";
             ctx.fillText(`Attendance: ${weekPeriod}`, totalWidth / 2, padding + headerHeight / 2);
 
-            // Table Background
             ctx.fillStyle = "#2E3537";
             ctx.fillRect(padding, padding + headerHeight, tableWidth, tableHeight);
             ctx.strokeStyle = "#4A5557";
             ctx.lineWidth = 1;
 
-            // Table Headers with Gradient
             const headers = ["Member", "Tag", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
             const colWidths = [nameWidth, tagWidth, ...Array(7).fill(dayWidth)];
             let x = padding;
@@ -916,7 +919,6 @@
                 x += colWidths[i];
             });
 
-            // Table Grid
             for (let i = 0; i <= members.length + 1; i++) {
                 ctx.beginPath();
                 ctx.moveTo(padding, padding + headerHeight + i * rowHeight);
@@ -932,7 +934,6 @@
                 x += width;
             });
 
-            // Table Data
             ctx.font = "14px Poppins";
             members.forEach((member, index) => {
                 const y = padding + headerHeight + rowHeight + index * rowHeight;
@@ -954,12 +955,10 @@
                 }
             });
 
-            // Info Section (Summary + Legend)
             const infoY = padding + headerHeight + tableHeight + 20;
             ctx.fillStyle = "#33393B";
             ctx.fillRect(padding, infoY, tableWidth, infoHeight);
 
-            // Summary (Left)
             ctx.textAlign = "left";
             const summaryX = padding + 20;
             ctx.fillStyle = "#D32F2F";
@@ -976,7 +975,6 @@
                 ctx.fillText(item, summaryX, infoY + 45 + i * 25);
             });
 
-            // Legend (Right, matching Activities Tracker)
             const legendX = padding + tableWidth - 150;
             const legendY = infoY + 20;
             ctx.fillStyle = "#D32F2F";
@@ -989,7 +987,6 @@
                 ctx.fillText(item, legendX, legendY + 25 + i * 25);
             });
 
-            // Footer
             const footerY = infoY + infoHeight + 10;
             ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
             ctx.fillRect(padding, footerY, tableWidth, footerHeight);
@@ -999,7 +996,6 @@
             const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
             ctx.fillText(`Generated on: ${timestamp}`, totalWidth / 2, footerY + footerHeight / 2);
 
-            // Download with Blob
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
@@ -1009,7 +1005,9 @@
                 setTimeout(() => {
                     link.click();
                     document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
+                    URL.revokeObjectURL
+
+(url);
                     hideLoading();
                 }, 100);
             }, "image/png");
