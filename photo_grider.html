@@ -11,39 +11,42 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1C2526, #2E3537);
+            background: linear-gradient(135deg, #1C2526 0%, #2E3537 50%, #1C2526 100%);
             color: #E0E0E0;
             margin: 0;
             padding: 10px;
             overflow-x: hidden;
             animation: fadeInBody 1s ease-in-out;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
         }
         h1 {
             text-align: center;
             color: #D32F2F;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
             background: #2E3537;
             padding: 15px;
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
             animation: fadeInContainer 1s ease-in-out;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
-        .clock-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        #clock-container {
             text-align: center;
         }
         #clock {
@@ -54,24 +57,29 @@
             padding: 10px 20px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
+            min-width: 220px;
+            display: inline-block;
         }
-        #clock-text {
-            font-size: 1.2em;
-            color: #E8E8E8;
+        #ph-time {
+            font-size: 1em;
+            color: #B0BEC5;
             margin-top: 5px;
-            white-space: nowrap;
         }
         .input-section, .preview-controls {
+            margin: 20px 0;
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
-            margin: 20px 0;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
         }
-        .fit-buttons {
+        label {
+            color: #B0BEC5;
+            font-weight: 400;
+            font-size: 1.1em;
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
         }
         select, input[type="range"] {
             padding: 10px;
@@ -80,14 +88,17 @@
             background: #E0E0E0;
             color: #1C2526;
             font-family: 'Poppins', sans-serif;
-            max-width: 220px;
-            transition: all 0.3s ease;
-        }
-        input[type="range"] {
             width: 100%;
             max-width: 220px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        select:focus, input[type="range"]:focus {
+            outline: none;
+            box-shadow: 0 0 5px #D32F2F;
+        }
+        input[type="range"] {
             -webkit-appearance: none;
-            background: #E0E0E0;
             height: 8px;
         }
         input[type="range"]::-webkit-slider-thumb {
@@ -97,10 +108,6 @@
             background: #D32F2F;
             border-radius: 50%;
             cursor: pointer;
-        }
-        select:focus {
-            outline: none;
-            box-shadow: 0 0 5px #D32F2F;
         }
         button {
             padding: 12px 24px;
@@ -116,12 +123,13 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-        button.active {
+        button:hover {
             background: linear-gradient(45deg, #8B0000, #D32F2F);
             transform: scale(1.05);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            animation: pulse 0.8s infinite;
         }
-        button:hover {
+        button.active {
             background: linear-gradient(45deg, #8B0000, #D32F2F);
             transform: scale(1.05);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
@@ -148,29 +156,143 @@
             max-width: 100%;
             max-height: 100vh;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #2E3537;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: fadeInModal 0.3s ease-in-out;
+        }
+        .modal-content h3 {
+            color: #D32F2F;
+            margin-bottom: 15px;
+        }
+        .modal-content p {
+            color: #E0E0E0;
+            margin-bottom: 20px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .modal-buttons button {
+            padding: 10px 20px;
+            min-width: 100px;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #D32F2F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInBody {
+            from { opacity: 0; background: #1C2526; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInContainer {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
         }
         @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                overflow-x: hidden;
+            }
+            .container {
+                padding: 10px;
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
             .header {
                 flex-direction: column;
-                align-items: center;
+                text-align: center;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            #clock {
+                font-size: 1.8em;
+                min-width: 180px;
+                padding: 8px 15px;
+            }
+            #ph-time {
+                font-size: 0.9em;
             }
             .input-section, .preview-controls {
                 flex-direction: column;
                 align-items: center;
-            }
-            .fit-buttons {
-                flex-direction: column;
+                gap: 10px;
                 width: 100%;
             }
-            select, button, input[type="range"] {
+            label {
+                width: 100%;
+                text-align: left;
+                justify-content: space-between;
+            }
+            select, input[type="range"], button {
                 max-width: 100%;
                 width: 100%;
+                box-sizing: border-box;
             }
-            #clock {
-                font-size: 1.8em;
+            button:hover {
+                animation: none;
+                transform: none;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             }
-            #clock-text {
-                font-size: 1em;
+            .modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .modal-buttons button {
+                width: 100%;
+                max-width: 200px;
             }
         }
     </style>
@@ -179,14 +301,15 @@
     <div class="container">
         <div class="header">
             <h1>Redstorm Instagram Photo Grider</h1>
-            <div class="clock-container">
+            <div id="clock-container">
                 <div id="clock"></div>
-                <div id="clock-text">PH Time</div>
+                <div id="ph-time">PH Time</div>
             </div>
         </div>
         <div class="input-section">
             <button onclick="document.getElementById('fileInput').click()"><i class="fas fa-upload"></i> Upload Image</button>
             <input type="file" id="fileInput" accept="image/*">
+            <label for="gridSize">Grid Size:</label>
             <select id="gridSize">
                 <option value="3x1">3x1 (3 posts)</option>
                 <option value="3x3" selected>3x3 (9 posts)</option>
@@ -199,10 +322,8 @@
             <canvas id="previewCanvas"></canvas>
         </div>
         <div class="preview-controls">
-            <div class="fit-buttons">
-                <button id="fitVerticalBtn" onclick="toggleFitVertical()"><i class="fas fa-arrows-alt-v"></i> Fit Vertical</button>
-                <button id="fitHorizontalBtn" onclick="toggleFitHorizontal()"><i class="fas fa-arrows-alt-h"></i> Fit Horizontal</button>
-            </div>
+            <button id="fitVerticalBtn" onclick="toggleFitVertical()"><i class="fas fa-arrows-alt-v"></i> Fit Vertical</button>
+            <button id="fitHorizontalBtn" onclick="toggleFitHorizontal()"><i class="fas fa-arrows-alt-h"></i> Fit Horizontal</button>
             <label>Border Color: 
                 <div id="colorPreview" class="color-preview" style="background-color: #FFFFFF;"></div>
                 <input type="color" id="borderColorInput" value="#FFFFFF">
@@ -213,6 +334,22 @@
             <button onclick="downloadPNGs()"><i class="fas fa-download"></i> Download All PNGs</button>
             <button onclick="downloadZIP()"><i class="fas fa-file-zipper"></i> Download as ZIP</button>
         </div>
+    </div>
+
+    <!-- Modal Template -->
+    <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <h3 id="alertTitle"></h3>
+            <p id="alertMessage"></p>
+            <div class="modal-buttons">
+                <button onclick="closeModal('alertModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
     </div>
 
     <script>
@@ -226,16 +363,37 @@
         let stretchX = 1, stretchY = 1;
         let isFitVerticalActive = false;
         let isFitHorizontalActive = false;
-        let imageCanvas = null; // Off-screen canvas for the static image
+        let imageCanvas = null;
 
         // Clock
         function updateClock() {
             const now = new Date();
             const phTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-            document.getElementById("clock").textContent = phTime.toLocaleTimeString("en-US", { hour12: true });
+            const timeString = phTime.toLocaleTimeString("en-US", { hour12: true });
+            document.getElementById("clock").textContent = timeString;
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Modal Functions
+        function showAlert(title, message) {
+            document.getElementById("alertTitle").textContent = title;
+            document.getElementById("alertMessage").textContent = message;
+            document.getElementById("alertModal").style.display = "flex";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        // Loading Overlay
+        function showLoading() {
+            document.getElementById("loadingOverlay").style.display = "flex";
+        }
+
+        function hideLoading() {
+            document.getElementById("loadingOverlay").style.display = "none";
+        }
 
         // Color Preview
         const colorPreview = document.getElementById("colorPreview");
@@ -250,6 +408,7 @@
         document.getElementById("fileInput").addEventListener("change", (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            showLoading();
             const img = new Image();
             img.onload = () => {
                 originalImage = img;
@@ -260,6 +419,11 @@
                 document.getElementById("fitVerticalBtn").classList.remove("active");
                 document.getElementById("fitHorizontalBtn").classList.remove("active");
                 setupPreviewCanvas();
+                hideLoading();
+            };
+            img.onerror = () => {
+                showAlert("Error", "Failed to load the image.");
+                hideLoading();
             };
             img.src = URL.createObjectURL(file);
         });
@@ -297,7 +461,6 @@
             }
             cropData = { x: (canvas.width - cropWidth) / 2, y: (canvas.height - cropHeight) / 2, width: cropWidth, height: cropHeight };
             
-            // Initialize the off-screen canvas for the image
             imageCanvas = document.createElement("canvas");
             imageCanvas.width = canvas.width;
             imageCanvas.height = canvas.height;
@@ -311,7 +474,7 @@
             if (originalImage) setupPreviewCanvas();
         });
 
-        // Draw the image to the off-screen canvas (called when the image or scaling changes)
+        // Draw Image to Off-Screen Canvas
         function drawImageToOffScreenCanvas() {
             if (!imageCanvas || !originalImage) return;
             const ctx = imageCanvas.getContext("2d");
@@ -326,13 +489,12 @@
                           offsetX, offsetY, scaledWidth, scaledHeight);
         }
 
-        // Draw Preview (called when not dragging)
+        // Draw Preview
         function drawPreview() {
             const canvas = document.getElementById("previewCanvas");
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw the pre-rendered image from the off-screen canvas
             if (imageCanvas) {
                 ctx.drawImage(imageCanvas, 0, 0);
             }
@@ -340,7 +502,7 @@
             drawCropBox(ctx);
         }
 
-        // Draw only the crop box and grid (used during dragging)
+        // Draw Crop Box
         function drawCropBox(ctx) {
             if (!cropData) return;
 
@@ -543,7 +705,6 @@
                     snapToPhotoBorders();
                 }
 
-                // Optimized redraw during dragging
                 const ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 if (imageCanvas) ctx.drawImage(imageCanvas, 0, 0);
@@ -554,7 +715,7 @@
                 if (isPinching) isPinching = false;
                 if (isDragging) {
                     isDragging = false;
-                    drawPreview(); // Final redraw when dragging ends
+                    drawPreview();
                 }
             }
 
@@ -572,7 +733,7 @@
 
         // Reset Crop
         function resetCrop() {
-            if (!originalImage) return alert("Please upload an image first.");
+            if (!originalImage) return showAlert("Error", "Please upload an image first.");
             const canvas = document.getElementById("previewCanvas");
             const ratio = (grid.cols * 4) / (grid.rows * 5);
             let width = canvas.width;
@@ -597,9 +758,9 @@
             drawPreview();
         }
 
-        // Center Crop Box (both horizontally and vertically)
+        // Center Crop Box
         function centerCropBox() {
-            if (!cropData) return alert("Please upload an image first.");
+            if (!cropData) return showAlert("Error", "Please upload an image first.");
             const canvas = document.getElementById("previewCanvas");
             cropData.x = (canvas.width - cropData.width) / 2;
             cropData.y = (canvas.height - cropData.height) / 2;
@@ -607,23 +768,9 @@
             drawPreview();
         }
 
-        // Center Crop Box Vertically
-        function centerCropBoxVertically() {
-            const canvas = document.getElementById("previewCanvas");
-            cropData.y = (canvas.height - cropData.height) / 2;
-            snapToPhotoBorders();
-        }
-
-        // Center Crop Box Horizontally
-        function centerCropBoxHorizontally() {
-            const canvas = document.getElementById("previewCanvas");
-            cropData.x = (canvas.width - cropData.width) / 2;
-            snapToPhotoBorders();
-        }
-
         // Toggle Fit Vertical
         function toggleFitVertical() {
-            if (!originalImage || !cropData) return alert("Please upload and adjust an image first.");
+            if (!originalImage || !cropData) return showAlert("Error", "Please upload and adjust an image first.");
             const btn = document.getElementById("fitVerticalBtn");
             const canvas = document.getElementById("previewCanvas");
             const scale = canvas.width / originalImage.width;
@@ -639,7 +786,8 @@
                 }
                 isFitVerticalActive = true;
                 btn.classList.add("active");
-                centerCropBoxVertically();
+                cropData.y = (canvas.height - cropData.height) / 2;
+                snapToPhotoBorders();
             }
             drawImageToOffScreenCanvas();
             drawPreview();
@@ -647,7 +795,7 @@
 
         // Toggle Fit Horizontal
         function toggleFitHorizontal() {
-            if (!originalImage || !cropData) return alert("Please upload and adjust an image first.");
+            if (!originalImage || !cropData) return showAlert("Error", "Please upload and adjust an image first.");
             const btn = document.getElementById("fitHorizontalBtn");
             const canvas = document.getElementById("previewCanvas");
             const scale = canvas.width / originalImage.width;
@@ -663,7 +811,8 @@
                 }
                 isFitHorizontalActive = true;
                 btn.classList.add("active");
-                centerCropBoxHorizontally();
+                cropData.x = (canvas.width - cropData.width) / 2;
+                snapToPhotoBorders();
             }
             drawImageToOffScreenCanvas();
             drawPreview();
@@ -685,7 +834,8 @@
 
         // Download PNGs
         function downloadPNGs() {
-            if (!cropData) return alert("Please upload and adjust an image first.");
+            if (!cropData) return showAlert("Error", "Please upload and adjust an image first.");
+            showLoading();
             const canvas = document.getElementById("previewCanvas");
             const scaledCanvas = createScaledImageCanvas();
             const scale = canvas.width / originalImage.width;
@@ -700,7 +850,7 @@
             const cropHeight = cropData.height / scale;
 
             const postWidth = Math.floor(cropWidth / grid.cols);
-            const postHeight = Math.floor(postWidth * 5 / 4); // 4:5 ratio
+            const postHeight = Math.floor(postWidth * 5 / 4);
             const sourceWidth = postWidth;
             const sourceHeight = Math.floor(cropHeight / grid.rows);
 
@@ -709,61 +859,11 @@
             tempCanvas.width = postWidth;
             tempCanvas.height = postHeight;
 
-            for (let row = 0; row < grid.rows; row++) {
-                for (let col = 0; col < grid.cols; col++) {
-                    ctx.clearRect(0, 0, postWidth, postHeight);
+            let completed = 0;
+            const totalImages = grid.cols * grid.rows;
 
-                    const srcX = cropX + col * sourceWidth;
-                    const srcY = cropY + row * sourceHeight;
-                    const destX = 0;
-                    const destY = (postHeight - sourceHeight) / 2; // Center vertically
-
-                    ctx.drawImage(scaledCanvas,
-                        srcX, srcY, sourceWidth, sourceHeight,
-                        destX, destY, sourceWidth, sourceHeight
-                    );
-
-                    tempCanvas.toBlob((blob) => {
-                        const link = document.createElement("a");
-                        link.href = URL.createObjectURL(blob);
-                        link.download = `${grid.cols}x${grid.rows}_grid_${row * grid.cols + col + 1}.png`;
-                        link.click();
-                        URL.revokeObjectURL(link.href);
-                    }, "image/png", 1.0);
-                }
-            }
-        }
-
-        // Download ZIP
-        function downloadZIP() {
-            if (!cropData) return alert("Please upload and adjust an image first.");
-            const canvas = document.getElementById("previewCanvas");
-            const scaledCanvas = createScaledImageCanvas();
-            const scale = canvas.width / originalImage.width;
-            const scaledWidth = stretchX * canvas.width;
-            const scaledHeight = stretchY * canvas.height;
-            const offsetX = (canvas.width - scaledWidth) / 2;
-            const offsetY = (canvas.height - scaledHeight) / 2;
-
-            const cropX = (cropData.x - offsetX) / scale;
-            const cropY = (cropData.y - offsetY) / scale;
-            const cropWidth = cropData.width / scale;
-            const cropHeight = cropData.height / scale;
-
-            const postWidth = Math.floor(cropWidth / grid.cols);
-            const postHeight = Math.floor(postWidth * 5 / 4); // 4:5 ratio
-            const sourceWidth = postWidth;
-            const sourceHeight = Math.floor(cropHeight / grid.rows);
-
-            const zip = new JSZip();
-            const tempCanvas = document.createElement("canvas");
-            const ctx = tempCanvas.getContext("2d");
-            tempCanvas.width = postWidth;
-            tempCanvas.height = postHeight;
-
-            let promises = [];
-            for (let row = 0; row < grid.rows; row++) {
-                for (let col = 0; col < grid.cols; col++) {
+            for (let row = grid.rows - 1; row >= 0; row--) {
+                for (let col = grid.cols - 1; col >= 0; col--) {
                     ctx.clearRect(0, 0, postWidth, postHeight);
 
                     const srcX = cropX + col * sourceWidth;
@@ -776,10 +876,68 @@
                         destX, destY, sourceWidth, sourceHeight
                     );
 
+                    const index = (grid.rows - 1 - row) * grid.cols + (grid.cols - 1 - col) + 1;
+                    tempCanvas.toBlob((blob) => {
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `${grid.cols}x${grid.rows}_grid_${index}.png`;
+                        link.click();
+                        URL.revokeObjectURL(link.href);
+                        completed++;
+                        if (completed === totalImages) hideLoading();
+                    }, "image/png", 1.0);
+                }
+            }
+        }
+
+        // Download ZIP
+        function downloadZIP() {
+            if (!cropData) return showAlert("Error", "Please upload and adjust an image first.");
+            showLoading();
+            const canvas = document.getElementById("previewCanvas");
+            const scaledCanvas = createScaledImageCanvas();
+            const scale = canvas.width / originalImage.width;
+            const scaledWidth = stretchX * canvas.width;
+            const scaledHeight = stretchY * canvas.height;
+            const offsetX = (canvas.width - scaledWidth) / 2;
+            const offsetY = (canvas.height - scaledHeight) / 2;
+
+            const cropX = (cropData.x - offsetX) / scale;
+            const cropY = (cropData.y - offsetY) / scale;
+            const cropWidth = cropData.width / scale;
+            const cropHeight = cropData.height / scale;
+
+            const postWidth = Math.floor(cropWidth / grid.cols);
+            const postHeight = Math.floor(postWidth * 5 / 4);
+            const sourceWidth = postWidth;
+            const sourceHeight = Math.floor(cropHeight / grid.rows);
+
+            const zip = new JSZip();
+            const tempCanvas = document.createElement("canvas");
+            const ctx = tempCanvas.getContext("2d");
+            tempCanvas.width = postWidth;
+            tempCanvas.height = postHeight;
+
+            let promises = [];
+            for (let row = grid.rows - 1; row >= 0; row--) {
+                for (let col = grid.cols - 1; col >= 0; col--) {
+                    ctx.clearRect(0, 0, postWidth, postHeight);
+
+                    const srcX = cropX + col * sourceWidth;
+                    const srcY = cropY + row * sourceHeight;
+                    const destX = 0;
+                    const destY = (postHeight - sourceHeight) / 2;
+
+                    ctx.drawImage(scaledCanvas,
+                        srcX, srcY, sourceWidth, sourceHeight,
+                        destX, destY, sourceWidth, sourceHeight
+                    );
+
+                    const index = (grid.rows - 1 - row) * grid.cols + (grid.cols - 1 - col) + 1;
                     promises.push(
                         new Promise((resolve) => {
                             tempCanvas.toBlob((blob) => {
-                                zip.file(`${grid.cols}x${grid.rows}_grid_${row * grid.cols + col + 1}.png`, blob);
+                                zip.file(`${grid.cols}x${grid.rows}_grid_${index}.png`, blob);
                                 resolve();
                             }, "image/png", 1.0);
                         })
@@ -791,7 +949,11 @@
                 const date = new Date().toISOString().split("T")[0];
                 zip.generateAsync({ type: "blob" }).then((content) => {
                     saveAs(content, `redstorm_grid_${date}.zip`);
+                    hideLoading();
                 });
+            }).catch(() => {
+                showAlert("Error", "Failed to create ZIP file.");
+                hideLoading();
             });
         }
 
